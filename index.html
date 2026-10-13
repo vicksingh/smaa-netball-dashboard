@@ -186,7 +186,8 @@ section.group { display: grid; gap: 10px; }
 /* ---------- Footer ---------- */
 footer { padding-block: 8px 28px; display: grid; gap: 14px; }
 .scozo { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; box-shadow: var(--shadow); }
-.scozo .mark { flex: none; width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--navy), var(--royal)); display: grid; place-items: center; color: #fff; font: italic 900 16px/1 var(--display); letter-spacing: -.01em; }
+.scozo .mark { flex: none; width: 56px; height: 56px; display: block; }
+.scozo .mark img { width: 56px; height: 56px; display: block; border-radius: 13px; box-shadow: 0 0 0 1px rgb(0 16 102 / .08), 0 2px 8px rgb(0 16 102 / .12); }
 .scozo .txt { flex: 1; min-width: 0; }
 .scozo .txt b { display: block; font: 900 16px/1.15 var(--display); font-stretch: 90%; text-transform: uppercase; }
 .scozo .txt span { font-size: 13.5px; color: var(--muted); }
@@ -259,7 +260,10 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
 
 <footer class="wrap">
   <div class="scozo">
-    <div class="mark" aria-hidden="true">SZ</div>
+    <picture class="mark">
+      <source srcset="assets/scozo-icon.webp" type="image/webp">
+      <img src="assets/scozo-icon.png" alt="ScoZo Netball app icon" width="56" height="56" loading="lazy">
+    </picture>
     <div class="txt">
       <b>Keep score with ScoZo</b>
       <span>The free netball scoring app for courtside parents and coaches.</span>
@@ -448,7 +452,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     const r = result(g);
     const odd = g.status && !["UPCOMING", "COMPLETED", "FINAL"].includes(String(g.status).toUpperCase()) && !r ? ` · ${esc(g.statusLabel || g.status)}` : "";
     const side = r ? scoreHtml(g, r) : `<div class="court">${esc(g.court || "Court TBC")}</div><span class="venue">${esc(venue(g.venue))}</span>`;
-    const vsLine = `${g.home ? "vs" : "@"} ${esc(g.opponent)}${!r && g.venue ? `<span class="m-venue"> · ${esc(venue(g.venue))}</span>` : ""}${odd}`;
+    const vsLine = `vs ${esc(g.opponent)}${!r && g.venue ? `<span class="m-venue"> · ${esc(venue(g.venue))}</span>` : ""}${odd}`;
     return `<button type="button" class="game${fav ? " fav" : ""}${r ? " results" : ""}" data-team="${t.id}">
       <div class="when">${fmtTime(g.time)}<small>${g.date ? dow(g.date) : ""}</small></div>
       <div class="team">${code ? `<span class="code">${esc(code)}</span>` : ""}<span class="nm">${esc(coach)}${fav ? ' <span class="star" aria-label="My team">★</span>' : ""}</span></div>
@@ -569,7 +573,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
       const res = result(g);
       const right = res ? scoreHtml(g, res) : `<div style="text-align:right"><div class="court">${fmtTime(g.time)}</div><span class="venue" style="display:block">${esc(g.court || "")}</span></div>`;
       return `<div class="round${i === nextIdx ? " now" : ""}"><div class="rn"><small>RD</small>${g.roundNo}</div>
-        <div class="d"><div>${g.home ? "vs" : "@"} ${esc(g.opponent)}</div><small>${g.date ? fmtDay(g.date) : "Date TBC"}${g.venue ? " · " + esc(venue(g.venue)) : ""}</small></div>${right}</div>`;
+        <div class="d"><div>vs ${esc(g.opponent)}</div><small>${g.date ? fmtDay(g.date) : "Date TBC"}${g.venue ? " · " + esc(venue(g.venue)) : ""}</small></div>${right}</div>`;
     }).join("");
     const played = r.W + r.L + r.D;
     $("#panel").innerHTML = `<div class="panel-top"><div class="grab"></div><div class="panel-head"><span class="code">${esc(b.code)}</span>
