@@ -12,7 +12,12 @@
 <link rel="icon" type="image/svg+xml" href="assets/smaa-logo.svg">
 <script>
   // Apply the saved theme before anything paints, so there's no flash.
-  try { const t = localStorage.getItem("smaa-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+  // Light is the default; "dark" or "auto" (follow the phone) only if someone picked it.
+  (function () {
+    let t = "light";
+    try { t = localStorage.getItem("smaa-theme") || "light"; } catch (e) {}
+    if (t !== "auto") document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+  })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -311,7 +316,11 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   };
 
   // ---------- theme ----------
-  function currentTheme() { try { return localStorage.getItem(THEME_KEY) || "auto"; } catch { return "auto"; } }
+  function currentTheme() {
+    let t = null;
+    try { t = localStorage.getItem(THEME_KEY); } catch {}
+    return t === "dark" || t === "auto" ? t : "light";
+  }
   function applyTheme(t) {
     if (t === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
     const b = $("#themeBtn");
@@ -320,8 +329,8 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     b.title = t === "auto" ? "Theme: follows your phone" : `Theme: ${t}`;
   }
   function cycleTheme() {
-    const next = { auto: "light", light: "dark", dark: "auto" }[currentTheme()];
-    try { next === "auto" ? localStorage.removeItem(THEME_KEY) : localStorage.setItem(THEME_KEY, next); } catch {}
+    const next = { light: "dark", dark: "auto", auto: "light" }[currentTheme()];
+    try { next === "light" ? localStorage.removeItem(THEME_KEY) : localStorage.setItem(THEME_KEY, next); } catch {}
     applyTheme(next);
   }
 
