@@ -141,6 +141,9 @@ section.group { display: grid; gap: 10px; }
 .chip.D { color: var(--draw); background: var(--draw-bg); }
 .chip.N { color: var(--muted); background: var(--soft); }
 .m-venue { display: none; }
+.ha { display: inline-block; margin-left: 6px; padding: 2px 5px 1px; border-radius: 4px; font: 800 9.5px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; vertical-align: 1px; }
+.ha.home { background: var(--soft); color: var(--accent); }
+.ha.away { border: 1px solid var(--line); color: var(--muted); padding: 1px 4px 0; }
 .bye { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px dashed var(--line); border-radius: var(--r); font-size: 14px; color: var(--muted); }
 
 .teams { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
@@ -372,6 +375,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   }
   const slug = (name) => name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
   const teamUrl = (t) => PLAYHQ_TEAM + slug(t.name) + "/" + t.id;
+  const ha = (g) => g.home == null ? "" : `<span class="ha ${g.home ? "home" : "away"}">${g.home ? "Home" : "Away"}</span>`;
   const venue = (v) => VENUE_SHORT[v] || v || "";
 
   function result(g) {
@@ -452,7 +456,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     const r = result(g);
     const odd = g.status && !["UPCOMING", "COMPLETED", "FINAL"].includes(String(g.status).toUpperCase()) && !r ? ` · ${esc(g.statusLabel || g.status)}` : "";
     const side = r ? scoreHtml(g, r) : `<div class="court">${esc(g.court || "Court TBC")}</div><span class="venue">${esc(venue(g.venue))}</span>`;
-    const vsLine = `vs ${esc(g.opponent)}${!r && g.venue ? `<span class="m-venue"> · ${esc(venue(g.venue))}</span>` : ""}${odd}`;
+    const vsLine = `vs ${esc(g.opponent)}${ha(g)}${!r && g.venue ? `<span class="m-venue"> · ${esc(venue(g.venue))}</span>` : ""}${odd}`;
     return `<button type="button" class="game${fav ? " fav" : ""}${r ? " results" : ""}" data-team="${t.id}">
       <div class="when">${fmtTime(g.time)}<small>${g.date ? dow(g.date) : ""}</small></div>
       <div class="team">${code ? `<span class="code">${esc(code)}</span>` : ""}<span class="nm">${esc(coach)}${fav ? ' <span class="star" aria-label="My team">★</span>' : ""}</span></div>
@@ -573,7 +577,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
       const res = result(g);
       const right = res ? scoreHtml(g, res) : `<div style="text-align:right"><div class="court">${fmtTime(g.time)}</div><span class="venue" style="display:block">${esc(g.court || "")}</span></div>`;
       return `<div class="round${i === nextIdx ? " now" : ""}"><div class="rn"><small>RD</small>${g.roundNo}</div>
-        <div class="d"><div>vs ${esc(g.opponent)}</div><small>${g.date ? fmtDay(g.date) : "Date TBC"}${g.venue ? " · " + esc(venue(g.venue)) : ""}</small></div>${right}</div>`;
+        <div class="d"><div>vs ${esc(g.opponent)}${ha(g)}</div><small>${g.date ? fmtDay(g.date) : "Date TBC"}${g.venue ? " · " + esc(venue(g.venue)) : ""}</small></div>${right}</div>`;
     }).join("");
     const played = r.W + r.L + r.D;
     $("#panel").innerHTML = `<div class="panel-top"><div class="grab"></div><div class="panel-head"><span class="code">${esc(b.code)}</span>
