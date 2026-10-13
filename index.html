@@ -272,6 +272,8 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
     const m = clean.match(/^(.*?)\s*(\d{1,2}\s*[A-Z])$/i);
     return m ? { coach: m[1].trim() || clean, code: m[2].replace(/\s+/g, "").toUpperCase() } : { coach: clean, code: "" };
   }
+  const VENUE_SHORT = { "SA United Church Netball Association": "SAUCNA Courts" };
+  const venue = (v) => VENUE_SHORT[v] || v || "";
   const slug = (name) => name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
   const teamUrl = (t) => PLAYHQ_TEAM + slug(t.name) + "/" + t.id;
 
@@ -363,7 +365,7 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
     } else if (r) {
       right = `<div class="score">${r.hasScore ? `<div class="nums">${g.score}–${g.oppScore}</div>` : ""}<span class="chip ${r.letter}">${esc(r.label)}</span></div>`;
     } else {
-      right = `<div class="where"><b>${esc(g.court || "Court TBC")}</b>${esc(g.venue || "")}</div>`;
+      right = `<div class="where"><b>${esc(g.court || "Court TBC")}</b>${esc(venue(g.venue))}</div>`;
     }
     const status = g.status && !["UPCOMING", "COMPLETED", "FINAL"].includes(String(g.status).toUpperCase()) && !r ? ` · ${esc(g.statusLabel || g.status)}` : "";
     return `<button type="button" class="game${fav ? " fav" : ""}" data-team="${t.id}">
@@ -417,7 +419,7 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
       html += `<div class="summary"><span><b>${rows.length}</b>results</span><span><b>${c.W}</b>wins</span><span><b>${c.L}</b>losses</span>${c.D ? `<span><b>${c.D}</b>draws</span>` : ""}</div>`;
     } else {
       const days = [...new Set(rows.map(r => r.g.date))].sort();
-      const venues = new Set(rows.map(r => r.g.venue).filter(Boolean));
+      const venues = new Set(rows.map(r => venue(r.g.venue)).filter(Boolean));
       html += `<div class="summary"><span><b>${rows.length}</b>games</span><span>${days.map(fmtDay).join(" & ")}</span>${venues.size ? `<span>${[...venues].map(esc).join(" · ")}</span>` : ""}</div>`;
     }
 
@@ -498,7 +500,7 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
         ? `<div class="score">${res.hasScore ? `<div class="nums">${g.score}–${g.oppScore}</div>` : ""}<span class="chip ${res.letter}">${esc(res.label)}</span></div>`
         : `<div class="where"><b>${fmtTime(g.time)}</b>${esc(g.court || "")}</div>`;
       return `<div class="round${i === nextIdx ? " now" : ""}"><div class="rn"><small>RD</small>${g.roundNo}</div>
-        <div class="d"><div>${g.home ? "vs" : "@"} ${esc(g.opponent)}</div><small>${g.date ? fmtDay(g.date) : "Date TBC"}${g.venue ? " · " + esc(g.venue) : ""}</small></div>${right}</div>`;
+        <div class="d"><div>${g.home ? "vs" : "@"} ${esc(g.opponent)}</div><small>${g.date ? fmtDay(g.date) : "Date TBC"}${g.venue ? " · " + esc(venue(g.venue)) : ""}</small></div>${right}</div>`;
     }).join("");
     const played = r.W + r.L + r.D;
     $("#panel").innerHTML = `<div class="panel-head"><span class="code" style="font-size:16px;padding:7px 9px">${esc(b.code)}</span>
