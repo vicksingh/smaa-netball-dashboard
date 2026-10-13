@@ -5,210 +5,275 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMAA Netball Matchday</title>
 <meta name="description" content="St Michael &amp; All Angels junior netball: this week's games and results, live from PlayHQ.">
-<meta name="theme-color" content="#0e2a3b">
+<meta name="theme-color" content="#001066">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SMAA Netball">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e2a3b'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23f2c230' stroke-width='5'/%3E%3Cpath d='M15 32h34M32 15c-7 9-7 25 0 34M32 15c7 9 7 25 0 34' stroke='%23f2c230' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="assets/smaa-logo.svg">
+<script>
+  // Apply the saved theme before anything paints, so there's no flash.
+  try { const t = localStorage.getItem("smaa-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,500..900;1,62..125,700..900&family=Open+Sans:wght@400;600;700&display=swap">
 <style>
-/* Layout: a courtside matchday board — sticky header with week stepper and tabs,
-   then age-group bands (U8 → U17) holding one row per game. */
+/* Layout: club-blue header band with the SMAA badge, a sticky week/age bar,
+   age-group sections of game cards, and a thumb-reach tab bar on phones. */
 :root {
-  --ink: #0e2a3b;          /* court-line navy */
-  --paper: #f3f6f4;        /* page */
+  --royal: #000f9e;       /* SMAA royal blue */
+  --navy: #001066;        /* SMAA navy */
+  --sky: #80b9e3;         /* "Stronger together" sky blue */
+  --band-a: #001066; --band-b: #0a1ab4;
+
+  --bg: #f2f4fb;
   --card: #ffffff;
-  --muted: #5c6f78;
-  --line: #d9e2df;
-  --accent: #0f7a5a;       /* court green */
-  --accent-ink: #ffffff;
-  --bib: #f2c230;          /* position-bib yellow */
-  --win: #13804f;  --win-bg: #def3e8;
-  --loss: #b4332b; --loss-bg: #fae3e0;
-  --draw: #7a5a00; --draw-bg: #fbf0cc;
-  --soft: #e7eeeb;
+  --ink: #0b1446;
+  --muted: #59628f;
+  --line: #dde2f1;
+  --soft: #e8ecf8;
+  --accent: #000f9e;      --accent-ink: #ffffff;
+  --code-bg: #001066;     --code-ink: #ffffff;
+  --star: #000f9e;
+  --win: #0d7a45;  --win-bg: #dcf2e5;
+  --loss: #b3261e; --loss-bg: #fbe1de;
+  --draw: #7a5c00; --draw-bg: #fbefc6;
+  --shadow: 0 1px 2px rgb(0 16 102 / .06), 0 4px 14px rgb(0 16 102 / .05);
+
   --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
-  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --r: 12px;
+  --body: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r: 14px;
+  --navh: 64px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --ink: #e8f0ee; --paper: #0b1a22; --card: #12252f; --muted: #93a8b0;
-  --line: #233a45; --accent: #3fbf8f; --accent-ink: #062218; --bib: #f2c230;
-  --win: #5fd39b; --win-bg: #123a2a; --loss: #f08a80; --loss-bg: #3d1c1a; --draw: #f2c230; --draw-bg: #3a3112;
-  --soft: #183039; color-scheme: dark;
+  --band-a: #000838; --band-b: #000f9e;
+  --bg: #050a2a; --card: #0d1546; --ink: #eef1ff; --muted: #9aa3d4; --line: #1f2a68; --soft: #131c55;
+  --accent: #80b9e3; --accent-ink: #001066; --code-bg: #80b9e3; --code-ink: #001066; --star: #80b9e3;
+  --win: #62d69e; --win-bg: #0f3829; --loss: #ff8f86; --loss-bg: #401822; --draw: #f2c94c; --draw-bg: #3a3214;
+  --shadow: none; color-scheme: dark;
 }}
 :root[data-theme="dark"] {
-  --ink: #e8f0ee; --paper: #0b1a22; --card: #12252f; --muted: #93a8b0;
-  --line: #233a45; --accent: #3fbf8f; --accent-ink: #062218; --bib: #f2c230;
-  --win: #5fd39b; --win-bg: #123a2a; --loss: #f08a80; --loss-bg: #3d1c1a; --draw: #f2c230; --draw-bg: #3a3112;
-  --soft: #183039; color-scheme: dark;
+  --band-a: #000838; --band-b: #000f9e;
+  --bg: #050a2a; --card: #0d1546; --ink: #eef1ff; --muted: #9aa3d4; --line: #1f2a68; --soft: #131c55;
+  --accent: #80b9e3; --accent-ink: #001066; --code-bg: #80b9e3; --code-ink: #001066; --star: #80b9e3;
+  --win: #62d69e; --win-bg: #0f3829; --loss: #ff8f86; --loss-bg: #401822; --draw: #f2c94c; --draw-bg: #3a3214;
+  --shadow: none; color-scheme: dark;
 }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--paper); color: var(--ink); font: 400 16px/1.45 var(--body); -webkit-font-smoothing: antialiased; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.45 var(--body); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 button { font: inherit; color: inherit; }
 a { color: var(--accent); }
-:focus-visible { outline: 3px solid var(--bib); outline-offset: 2px; border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; border-radius: 8px; }
+.wrap { max-width: 780px; margin: 0 auto; padding-inline: 16px; }
 
-.wrap { max-width: 760px; margin: 0 auto; padding-inline: 16px; }
-
-/* Header */
-header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 12px; padding-block: 14px 10px; }
-.crest { flex: none; width: 40px; height: 40px; border-radius: 10px; background: #0e2a3b; display: grid; place-items: center; }
-.brand h1 { margin: 0; font: 800 22px/1 var(--display); font-stretch: 80%; letter-spacing: .01em; text-transform: uppercase; }
-.brand p { margin: 3px 0 0; font-size: 13px; color: var(--muted); }
-.sync { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); text-align: right; }
-.sync button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; width: 36px; height: 36px; display: grid; place-items: center; cursor: pointer; flex: none; }
-.sync button svg { width: 18px; height: 18px; }
-.sync.loading button svg { animation: spin 0.9s linear infinite; }
+/* ---------- Brand band ---------- */
+.band-top { background: linear-gradient(115deg, var(--band-a) 0%, var(--band-b) 62%, var(--band-a) 62.2%, var(--band-a) 100%); color: #fff; padding-top: env(safe-area-inset-top, 0px); }
+.brand { display: flex; align-items: center; gap: 12px; padding-block: 14px 16px; }
+.brand img { width: 74px; height: auto; flex: none; display: block; }
+.brand .titles { min-width: 0; }
+.eyebrow { margin: 0; font: italic 800 13px/1 var(--display); font-stretch: 100%; letter-spacing: .04em; text-transform: uppercase; color: var(--sky); }
+.brand h1 { margin: 4px 0 0; font: 900 28px/0.95 var(--display); font-stretch: 85%; text-transform: uppercase; letter-spacing: .01em; }
+.brand .updated { margin: 5px 0 0; font-size: 12.5px; opacity: .8; }
+.brand-actions { margin-left: auto; display: flex; gap: 8px; flex: none; }
+.iconbtn { width: 42px; height: 42px; border-radius: 999px; border: 1.5px solid rgb(255 255 255 / .35); background: rgb(255 255 255 / .08); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.iconbtn:hover { background: rgb(255 255 255 / .16); }
+.iconbtn svg { width: 20px; height: 20px; }
+.loading #refresh svg { animation: spin .9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .sync.loading button svg { animation: none; } }
 
-.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-block: 0 12px; }
-.tabs { display: flex; background: var(--soft); border-radius: 999px; padding: 3px; }
-.tabs button { border: 0; background: none; padding: 7px 14px; border-radius: 999px; font: 700 14px/1 var(--display); font-stretch: 90%; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; color: var(--muted); }
-.tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
-.week { display: flex; align-items: center; gap: 4px; margin-left: auto; }
-.week button { border: 1px solid var(--line); background: var(--card); width: 34px; height: 34px; border-radius: 999px; cursor: pointer; display: grid; place-items: center; }
-.week button:disabled { opacity: .35; cursor: default; }
-.week .label { min-width: 132px; text-align: center; font: 700 14px/1.15 var(--display); font-stretch: 90%; }
-.week .label small { display: block; font: 400 12px/1.2 var(--body); color: var(--muted); }
-
-.ages { display: flex; gap: 6px; overflow-x: auto; padding-block: 0 12px; scrollbar-width: none; }
+/* ---------- Sticky control bar ---------- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar-row { display: flex; align-items: center; gap: 12px; padding-block: 12px 10px; }
+.week { display: flex; align-items: center; gap: 6px; flex: 1; }
+.week button { flex: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow); }
+.week button:active { transform: scale(.96); }
+.week .label { flex: 1; text-align: center; font: 800 17px/1.1 var(--display); font-stretch: 90%; text-transform: uppercase; letter-spacing: .02em; }
+.week .label small { display: block; margin-top: 2px; font: 600 12.5px/1.2 var(--body); text-transform: none; letter-spacing: 0; color: var(--muted); }
+.ages { display: flex; gap: 8px; overflow-x: auto; padding-block: 0 12px; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
 .ages::-webkit-scrollbar { display: none; }
-.ages button { flex: none; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font: 700 13px/1 var(--display); font-stretch: 90%; cursor: pointer; }
+.ages button { flex: none; min-height: 38px; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 0 15px; font: 800 14px/1 var(--display); font-stretch: 90%; cursor: pointer; }
 .ages button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
-main { padding-block: 16px 48px; display: grid; gap: 22px; }
+/* ---------- Tabs: top on desktop, bottom bar on phones ---------- */
+.tabs { display: flex; gap: 4px; background: var(--soft); border-radius: 999px; padding: 4px; flex: none; }
+.tabs button { border: 0; background: none; padding: 9px 16px; border-radius: 999px; font: 800 14px/1 var(--display); font-stretch: 90%; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.tabs button svg { width: 18px; height: 18px; }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 
-/* Summary strip */
-.summary { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); }
-.summary b { color: var(--ink); font: 800 18px/1 var(--display); font-variant-numeric: tabular-nums; margin-right: 4px; }
+/* ---------- Content ---------- */
+main { padding-block: 16px 40px; display: grid; gap: 24px; }
+.summary { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--muted); }
+.summary b { color: var(--ink); font: 900 20px/1 var(--display); font-variant-numeric: tabular-nums; margin-right: 4px; }
 
-/* Age band */
-section.band { display: grid; gap: 8px; }
-.band-head { display: flex; align-items: baseline; gap: 10px; }
-.band-head h2 { margin: 0; font: 900 30px/1 var(--display); font-stretch: 70%; letter-spacing: .01em; }
-.band-head span { font-size: 13px; color: var(--muted); }
-.band-head::after { content: ""; flex: 1; height: 2px; background: var(--line); transform: translateY(-6px); }
+section.group { display: grid; gap: 10px; }
+.group-head { display: flex; align-items: center; gap: 10px; }
+.group-head h2 { margin: 0; font: italic 900 30px/1 var(--display); font-stretch: 80%; color: var(--accent); }
+.group-head span { font-size: 13px; color: var(--muted); font-weight: 600; }
+.group-head::after { content: ""; flex: 1; height: 2px; background: var(--line); }
+.list { display: grid; gap: 8px; }
 
-.list { display: grid; gap: 6px; }
-.game { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; cursor: pointer; text-align: left; width: 100%; }
+.code { flex: none; display: inline-grid; place-items: center; min-width: 40px; height: 26px; padding: 0 9px; font: 900 13px/1 var(--display); font-stretch: 90%; letter-spacing: .03em; background: var(--code-bg); color: var(--code-ink); clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%); }
+
+.game { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; grid-template-areas: "when team side" "when vs side"; align-items: center; column-gap: 14px; row-gap: 3px; width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; cursor: pointer; box-shadow: var(--shadow); }
 .game:hover { border-color: var(--accent); }
-.game.fav { box-shadow: inset 4px 0 0 var(--bib); }
-.when { font: 800 17px/1 var(--display); font-stretch: 85%; font-variant-numeric: tabular-nums; }
-.when small { display: block; margin-top: 4px; font: 400 12px/1 var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-.who { min-width: 0; }
-.who .team { display: flex; align-items: center; gap: 8px; font-weight: 700; }
-.code { font: 800 13px/1 var(--display); font-stretch: 90%; background: var(--ink); color: var(--paper); border-radius: 6px; padding: 4px 6px; letter-spacing: .03em; flex: none; }
-.who .team .coach { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.who .vs { margin-top: 3px; font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.where { text-align: right; font-size: 13px; color: var(--muted); line-height: 1.25; max-width: 150px; }
-.where b { display: block; color: var(--ink); font: 800 15px/1.1 var(--display); font-stretch: 85%; }
-
-.score { text-align: right; display: grid; justify-items: end; gap: 4px; }
-.score .nums { font: 800 22px/1 var(--display); font-stretch: 85%; font-variant-numeric: tabular-nums; }
-.chip { font: 800 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 7px; border-radius: 999px; }
+.game.fav { border-left: 5px solid var(--star); padding-left: 10px; }
+.when { grid-area: when; font: 900 19px/1 var(--display); font-stretch: 85%; font-variant-numeric: tabular-nums; }
+.when small { display: block; margin-top: 5px; font: 700 11.5px/1 var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.team { grid-area: team; display: flex; align-items: center; gap: 9px; min-width: 0; font-weight: 700; font-size: 16.5px; }
+.team .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.star { color: var(--star); }
+.vs { grid-area: vs; font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.side { grid-area: side; text-align: right; }
+.court { font: 900 16px/1.05 var(--display); font-stretch: 85%; text-transform: uppercase; white-space: nowrap; }
+.venue { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.score { display: grid; justify-items: end; gap: 5px; }
+.score .nums { font: 900 24px/1 var(--display); font-stretch: 85%; font-variant-numeric: tabular-nums; }
+.chip { font: 900 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; }
 .chip.W { color: var(--win); background: var(--win-bg); }
 .chip.L { color: var(--loss); background: var(--loss-bg); }
 .chip.D { color: var(--draw); background: var(--draw-bg); }
 .chip.N { color: var(--muted); background: var(--soft); }
+.m-venue { display: none; }
+.bye { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px dashed var(--line); border-radius: var(--r); font-size: 14px; color: var(--muted); }
 
-.bye { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px dashed var(--line); border-radius: var(--r); font-size: 14px; color: var(--muted); }
-
-/* Teams grid */
-.teams { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
-.teamcard { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; cursor: pointer; text-align: left; width: 100%; }
+.teams { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.teamcard { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 13px 14px; cursor: pointer; box-shadow: var(--shadow); min-height: 60px; }
 .teamcard:hover { border-color: var(--accent); }
 .teamcard .meta { min-width: 0; flex: 1; }
 .teamcard .meta div { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .teamcard .meta small { color: var(--muted); font-size: 12.5px; }
-.rec { font: 800 14px/1 var(--display); font-stretch: 85%; font-variant-numeric: tabular-nums; color: var(--muted); }
-.star { color: var(--bib); }
+.rec { font: 900 15px/1 var(--display); font-stretch: 85%; font-variant-numeric: tabular-nums; color: var(--muted); }
 
-/* Empty / status */
-.empty { background: var(--card); border: 1px dashed var(--line); border-radius: var(--r); padding: 22px 18px; text-align: center; color: var(--muted); }
-.empty h3 { margin: 0 0 6px; color: var(--ink); font: 800 20px/1.1 var(--display); font-stretch: 85%; }
-.empty button { margin-top: 10px; border: 0; background: var(--accent); color: var(--accent-ink); padding: 9px 14px; border-radius: 999px; font-weight: 700; cursor: pointer; }
-.notice { font-size: 13.5px; padding: 10px 12px; border-radius: 10px; background: var(--loss-bg); color: var(--loss); }
-.skeleton { height: 62px; border-radius: var(--r); background: linear-gradient(90deg, var(--soft), var(--card), var(--soft)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+.empty { background: var(--card); border: 1.5px dashed var(--line); border-radius: var(--r); padding: 26px 18px; text-align: center; color: var(--muted); }
+.empty h3 { margin: 0 0 6px; color: var(--ink); font: 900 21px/1.1 var(--display); font-stretch: 85%; text-transform: uppercase; }
+.btn { margin-top: 12px; border: 0; background: var(--accent); color: var(--accent-ink); padding: 11px 18px; border-radius: 999px; font: 800 14px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+.notice { font-size: 14px; padding: 11px 14px; border-radius: 12px; background: var(--loss-bg); color: var(--loss); }
+.skeleton { height: 70px; border-radius: var(--r); background: linear-gradient(90deg, var(--soft), var(--card), var(--soft)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
 @keyframes shimmer { to { background-position: -200% 0; } }
 
-/* Team sheet (drawer) */
+/* ---------- Team sheet ---------- */
 .sheet[hidden] { display: none !important; }
-.sheet { position: fixed; inset: 0; z-index: 20; display: grid; align-items: end; justify-items: center; background: rgb(6 18 24 / .45); }
-.panel { background: var(--paper); width: min(760px, 100%); max-height: 88vh; overflow: auto; border-radius: 18px 18px 0 0; padding: 18px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
-.panel-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
-.panel-head h2 { margin: 0; font: 900 26px/1.05 var(--display); font-stretch: 75%; text-transform: uppercase; }
-.panel-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
-.panel-head .x { margin-left: auto; border: 1px solid var(--line); background: var(--card); width: 36px; height: 36px; border-radius: 999px; cursor: pointer; flex: none; }
-.panel-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--card); padding: 8px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; color: var(--ink); }
-.pill.on { background: var(--bib); border-color: var(--bib); color: #2a2100; }
+.sheet { position: fixed; inset: 0; z-index: 30; display: grid; align-items: end; justify-items: center; background: rgb(0 6 40 / .55); }
+.panel { background: var(--bg); width: min(780px, 100%); max-height: 90vh; overflow: auto; border-radius: 22px 22px 0 0; padding: 0 0 calc(24px + env(safe-area-inset-bottom, 0px)); }
+.panel-top { background: linear-gradient(115deg, var(--band-a), var(--band-b)); color: #fff; padding: 10px 16px 18px; border-radius: 22px 22px 0 0; }
+.grab { width: 44px; height: 5px; border-radius: 9px; background: rgb(255 255 255 / .4); margin: 0 auto 12px; }
+.panel-head { display: flex; align-items: center; gap: 12px; }
+.panel-head .code { height: 34px; min-width: 52px; font-size: 16px; background: #fff; color: var(--royal); }
+.panel-head h2 { margin: 0; font: 900 26px/1 var(--display); font-stretch: 80%; text-transform: uppercase; }
+.panel-head p { margin: 4px 0 0; font-size: 13.5px; opacity: .85; }
+.panel-head .iconbtn { margin-left: auto; }
+.panel-body { padding: 16px 16px 0; display: grid; gap: 14px; }
+.panel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; min-height: 42px; border: 1px solid var(--line); background: var(--card); padding: 0 15px; border-radius: 999px; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; color: var(--ink); }
+.pill.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .rounds { display: grid; gap: 6px; }
-.round { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 9px 12px; }
-.round.now { border-color: var(--accent); }
-.round .rn { font: 900 20px/1 var(--display); font-stretch: 75%; color: var(--muted); }
-.round .rn small { display: block; font: 700 10px/1 var(--display); letter-spacing: .08em; }
-.round .d { min-width: 0; }
+.round { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.round.now { border: 2px solid var(--accent); }
+.round .rn { font: 900 22px/1 var(--display); font-stretch: 75%; color: var(--muted); }
+.round .rn small { display: block; font: 800 9.5px/1 var(--display); letter-spacing: .1em; }
 .round .d div { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .round .d small { color: var(--muted); font-size: 13px; }
 .round.tbc { background: transparent; border-style: dashed; }
 .round.tbc .d div { font-weight: 400; color: var(--muted); }
 
-footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
+/* ---------- Footer ---------- */
+footer { padding-block: 8px 28px; display: grid; gap: 14px; }
+.scozo { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; box-shadow: var(--shadow); }
+.scozo .mark { flex: none; width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--navy), var(--royal)); display: grid; place-items: center; color: #fff; font: italic 900 16px/1 var(--display); letter-spacing: -.01em; }
+.scozo .txt { flex: 1; min-width: 0; }
+.scozo .txt b { display: block; font: 900 16px/1.15 var(--display); font-stretch: 90%; text-transform: uppercase; }
+.scozo .txt span { font-size: 13.5px; color: var(--muted); }
+.stores { display: flex; flex-wrap: wrap; gap: 8px; }
+.store { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 13px; border-radius: 10px; background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 700; font-size: 13.5px; white-space: nowrap; }
+.store svg { width: 17px; height: 17px; }
+.fine { font-size: 12.5px; color: var(--muted); margin: 0; }
 
-@media (max-width: 520px) {
-  .brand h1 { font-size: 19px; }
-  .week { margin-left: 0; width: 100%; justify-content: space-between; }
-  .game { grid-template-columns: 54px 1fr auto; gap: 10px; }
-  .where { max-width: 110px; }
+/* ---------- Phones ---------- */
+@media (max-width: 640px) {
+  .brand img { width: 62px; }
+  .brand h1 { font-size: 24px; }
+  .bar-row .tabs { display: none; }
+  .tabs.bottom { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; border-radius: 0; gap: 0; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--card); border-top: 1px solid var(--line); box-shadow: 0 -4px 18px rgb(0 0 0 / .06); }
+  .tabs.bottom button { flex: 1; flex-direction: column; gap: 4px; padding: 7px 0; border-radius: 12px; font-size: 11.5px; min-height: 52px; justify-content: center; }
+  .tabs.bottom button svg { width: 22px; height: 22px; }
+  .tabs.bottom button[aria-selected="true"] { background: var(--soft); color: var(--accent); }
+  main { padding-bottom: 24px; }
+  footer { padding-bottom: calc(var(--navh) + 28px + env(safe-area-inset-bottom, 0px)); }
+  .game { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when side" "team team" "vs vs"; row-gap: 8px; padding: 13px 14px; }
+  .when { display: flex; align-items: baseline; gap: 8px; font-size: 18px; }
+  .when small { margin: 0; }
+  .side { align-self: start; }
+  .venue { display: none; }
+  .m-venue { display: inline; }
+  .vs { white-space: normal; font-size: 14.5px; }
+  .team { font-size: 17.5px; }
+  .score .nums { font-size: 22px; }
+  .game.results { grid-template-areas: "when side" "team side" "vs vs"; }
 }
+@media (min-width: 641px) { .tabs.bottom { display: none; } }
+@media (prefers-reduced-motion: reduce) { .loading #refresh svg, .skeleton { animation: none; } }
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <div class="brand">
-      <div class="crest" aria-hidden="true">
-        <svg width="26" height="26" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="#f2c230" stroke-width="6"/><path d="M10 32h44M32 10c-9 12-9 32 0 44M32 10c9 12 9 32 0 44" stroke="#f2c230" stroke-width="4" fill="none"/></svg>
-      </div>
-      <div>
-        <h1>SMAA Netball</h1>
-        <p id="season">Summer Juniors 2026/27</p>
-      </div>
-      <div class="sync" id="sync">
-        <span id="syncText">Syncing…</span>
-        <button id="refresh" type="button" aria-label="Sync from PlayHQ now">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.6 4.5L20 16"/><path d="M20 21v-5h-5"/></svg>
-        </button>
-      </div>
+<header class="band-top">
+  <div class="wrap brand">
+    <img src="assets/smaa-logo-on-blue.svg" alt="SMAA Netball Club" width="74" height="46">
+    <div class="titles">
+      <p class="eyebrow">Stronger together</p>
+      <h1>Matchday</h1>
+      <p class="updated" id="syncText">Syncing with PlayHQ…</p>
     </div>
-    <div class="controls">
-      <div class="tabs" role="tablist" aria-label="View">
-        <button role="tab" id="tab-games" data-view="games" aria-selected="true">Games</button>
-        <button role="tab" id="tab-results" data-view="results" aria-selected="false">Results</button>
-        <button role="tab" id="tab-teams" data-view="teams" aria-selected="false">Teams</button>
-      </div>
+    <div class="brand-actions" id="sync">
+      <button class="iconbtn" id="themeBtn" type="button" aria-label="Theme: automatic"></button>
+      <button class="iconbtn" id="refresh" type="button" aria-label="Sync from PlayHQ now">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.6 4.5L20 16"/><path d="M20 21v-5h-5"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="bar-row">
       <div class="week" id="weekNav">
-        <button type="button" id="prevWeek" aria-label="Previous week"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button type="button" id="prevWeek" aria-label="Previous week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
         <div class="label" id="weekLabel">This week<small>&nbsp;</small></div>
-        <button type="button" id="nextWeek" aria-label="Next week"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button type="button" id="nextWeek" aria-label="Next week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
+      <nav class="tabs" role="tablist" aria-label="View" data-tabs></nav>
     </div>
     <div class="ages" id="ages" role="group" aria-label="Age group"></div>
   </div>
-</header>
+</div>
 
 <main class="wrap" id="main" aria-live="polite">
   <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
 </main>
 
 <footer class="wrap">
-  Fixtures and scores come straight from PlayHQ each time this page opens. If something looks wrong, check the team's PlayHQ page.
+  <div class="scozo">
+    <div class="mark" aria-hidden="true">SZ</div>
+    <div class="txt">
+      <b>Keep score with ScoZo</b>
+      <span>The free netball scoring app for courtside parents and coaches.</span>
+    </div>
+  </div>
+  <div class="stores">
+    <a class="store" href="https://apps.apple.com/au/app/id6760931216" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2.1-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.8 1.3 10.3.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.4.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.2zM13.9 5c.7-.9 1.2-2 1.1-3.2-1 .1-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>
+      Download on the App Store
+    </a>
+    <a class="store" href="https://play.google.com/store/search?q=ScoZo%20Netball&amp;c=apps" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 2.6c-.3.3-.4.7-.4 1.2v16.4c0 .5.1.9.4 1.2l9.3-9.4L4 2.6zm10.4 10.5 2.6 2.6-11.3 6.4 8.7-9zm0-2.2L5.7 1.9 17 8.3l-2.6 2.6zm3.9-1.9 3 1.7c.9.5.9 1.4 0 1.9l-3 1.7-2.8-2.7 2.8-2.6z"/></svg>
+      Get it on Google Play
+    </a>
+  </div>
+  <p class="fine">Fixtures and scores come straight from PlayHQ every time this page opens. If something looks wrong, check the team's PlayHQ page. Swipe left or right to change week.</p>
 </footer>
+
+<nav class="tabs bottom" role="tablist" aria-label="View" data-tabs></nav>
 
 <div class="sheet" id="sheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" id="panel"></div>
@@ -220,7 +285,18 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
   const PLAYHQ_TEAM = "https://www.playhq.com/netball-australia/org/st-michael-and-all-angels/72bc9771/saucna-summer-juniors-summer-202627/teams/";
   const CACHE_KEY = "smaa-dash-v1";
   const FAV_KEY = "smaa-favs-v1";
+  const THEME_KEY = "smaa-theme";
   const DONE = new Set(["COMPLETED", "FINAL", "FINALISED", "FORFEIT", "WALKOVER", "PLAYED"]);
+  const VENUE_SHORT = { "SA United Church Netball Association": "SAUCNA Courts" };
+
+  const ICONS = {
+    games: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+    results: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>',
+    teams: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.2a5 5 0 0 1 5.5 5"/></svg>',
+    auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17A8.5 8.5 0 0 0 12 3.5z" fill="currentColor"/></svg>',
+    light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>',
+  };
 
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -230,40 +306,49 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
   };
 
   const state = {
-    data: null,
-    view: "games",
-    age: "all",
-    weekOffset: 0,           // weeks from the current week
-    favs: new Set(store.get(FAV_KEY, [])),
-    lastSync: null,
-    error: null,
+    data: null, view: "games", age: "all", weekOffset: 0,
+    favs: new Set(store.get(FAV_KEY, [])), error: null, firstLoad: true,
   };
 
-  // ---------- dates (all local, as YYYY-MM-DD strings) ----------
+  // ---------- theme ----------
+  function currentTheme() { try { return localStorage.getItem(THEME_KEY) || "auto"; } catch { return "auto"; } }
+  function applyTheme(t) {
+    if (t === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+    const b = $("#themeBtn");
+    b.innerHTML = ICONS[t];
+    b.setAttribute("aria-label", `Theme: ${t === "auto" ? "automatic" : t}. Tap to change.`);
+    b.title = t === "auto" ? "Theme: follows your phone" : `Theme: ${t}`;
+  }
+  function cycleTheme() {
+    const next = { auto: "light", light: "dark", dark: "auto" }[currentTheme()];
+    try { next === "auto" ? localStorage.removeItem(THEME_KEY) : localStorage.setItem(THEME_KEY, next); } catch {}
+    applyTheme(next);
+  }
+
+  // ---------- dates ----------
   const pad = (n) => String(n).padStart(2, "0");
   const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const parseYmd = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
   function weekRange(offset) {
     const now = new Date();
-    const day = (now.getDay() + 6) % 7; // Monday = 0
+    const day = (now.getDay() + 6) % 7;
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + offset * 7);
     const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
     return { start: ymd(start), end: ymd(end), startD: start, endD: end };
   }
   const fmtDay = (s) => parseYmd(s).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
   const fmtShort = (d) => d.toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+  const dow = (s) => parseYmd(s).toLocaleDateString("en-AU", { weekday: "short" });
   function fmtTime(t) {
     if (!t) return "TBC";
     const [h, m] = t.split(":").map(Number);
-    const hh = ((h + 11) % 12) + 1;
-    return `${hh}:${pad(m)}${h < 12 ? "am" : "pm"}`;
+    return `${((h + 11) % 12) + 1}:${pad(m)}${h < 12 ? "am" : "pm"}`;
   }
   function ago(iso) {
     const s = Math.round((Date.now() - new Date(iso)) / 1000);
     if (s < 45) return "just now";
     if (s < 3600) return `${Math.round(s / 60)} min ago`;
-    const d = new Date(iso);
-    return d.toLocaleString("en-AU", { weekday: "short", hour: "numeric", minute: "2-digit" });
+    return new Date(iso).toLocaleString("en-AU", { weekday: "short", hour: "numeric", minute: "2-digit" });
   }
 
   // ---------- team helpers ----------
@@ -272,16 +357,15 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
     const m = clean.match(/^(.*?)\s*(\d{1,2}\s*[A-Z])$/i);
     return m ? { coach: m[1].trim() || clean, code: m[2].replace(/\s+/g, "").toUpperCase() } : { coach: clean, code: "" };
   }
-  const VENUE_SHORT = { "SA United Church Netball Association": "SAUCNA Courts" };
-  const venue = (v) => VENUE_SHORT[v] || v || "";
   const slug = (name) => name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
   const teamUrl = (t) => PLAYHQ_TEAM + slug(t.name) + "/" + t.id;
+  const venue = (v) => VENUE_SHORT[v] || v || "";
 
   function result(g) {
     const hasScore = g.score != null && g.oppScore != null;
     const done = hasScore || DONE.has(String(g.status || "").toUpperCase());
     if (!done) return null;
-    let o = String(g.outcome || g.outcomeLabel || "").toUpperCase();
+    const o = String(g.outcome || g.outcomeLabel || "").toUpperCase();
     let letter = o.startsWith("W") ? "W" : o.startsWith("L") ? "L" : (o.startsWith("D") || o.startsWith("T")) ? "D" : null;
     if (!letter && hasScore) letter = g.score > g.oppScore ? "W" : g.score < g.oppScore ? "L" : "D";
     return { letter: letter || "N", hasScore, label: letter ? { W: "Win", L: "Loss", D: "Draw" }[letter] : (g.statusLabel || "Played") };
@@ -294,32 +378,26 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
 
   // ---------- data ----------
   async function sync() {
-    const box = $("#sync");
-    box.classList.add("loading");
-    $("#syncText").textContent = "Syncing…";
+    document.body.classList.add("loading");
+    if (!state.data) $("#syncText").textContent = "Syncing with PlayHQ…";
     try {
       const res = await fetch(API, { cache: "no-store" });
       const body = await res.json();
       if (!res.ok || body.error) throw new Error(body.error || `HTTP ${res.status}`);
-      state.data = body;
-      state.error = null;
+      state.data = body; state.error = null;
       store.set(CACHE_KEY, body);
       if (state.firstLoad) { state.firstLoad = false; pickStartWeek(); }
     } catch (e) {
       state.error = state.data
         ? "Couldn't reach PlayHQ just now, so you're seeing the last saved copy."
-        : "Couldn't reach PlayHQ. Check your connection and tap the sync button to try again.";
+        : "Couldn't reach PlayHQ. Check your connection and tap sync to try again.";
     } finally {
-      box.classList.remove("loading");
+      document.body.classList.remove("loading");
       render();
     }
   }
-
-  // If this week has nothing at all (off-season, school holidays), jump to the next week with games.
   function pickStartWeek() {
-    if (!state.data) return;
-    const all = state.data.teams.flatMap(t => t.games.filter(g => g.date));
-    if (!all.length) return;
+    const all = (state.data?.teams || []).flatMap(t => t.games.filter(g => g.date));
     for (let o = 0; o < 8; o++) {
       const { start, end } = weekRange(o);
       if (all.some(g => g.date >= start && g.date <= end)) { state.weekOffset = o; return; }
@@ -327,11 +405,6 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
   }
 
   // ---------- render ----------
-  const AGE_ORDER = [8, 9, 11, 13, 15, 17];
-  function ageList() {
-    const ages = new Set((state.data?.teams || []).map(t => t.age).filter(a => a != null));
-    return [...ages].sort((a, b) => a - b);
-  }
   function teamsFiltered() {
     const ts = state.data?.teams || [];
     return state.age === "all" ? ts : ts.filter(t => String(t.age) === state.age);
@@ -343,113 +416,105 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
   }
 
   function renderChrome() {
-    const ages = ageList();
+    const ages = [...new Set((state.data?.teams || []).map(t => t.age).filter(a => a != null))].sort((a, b) => a - b);
     $("#ages").innerHTML = [["all", "All ages"], ...ages.map(a => [String(a), "U" + a])]
       .map(([v, l]) => `<button type="button" data-age="${v}" aria-pressed="${state.age === v}">${l}</button>`).join("");
-    document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === state.view)));
-    $("#weekNav").hidden = state.view === "teams";
+    const tabs = [["games", "Games"], ["results", "Results"], ["teams", "Teams"]]
+      .map(([v, l]) => `<button role="tab" type="button" data-view="${v}" aria-selected="${state.view === v}">${ICONS[v]}<span>${l}</span></button>`).join("");
+    document.querySelectorAll("[data-tabs]").forEach(n => n.innerHTML = tabs);
+    $("#weekNav").style.visibility = state.view === "teams" ? "hidden" : "visible";
     const w = weekRange(state.weekOffset);
-    const name = state.weekOffset === 0 ? "This week" : state.weekOffset === -1 ? "Last week" : state.weekOffset === 1 ? "Next week" : `${fmtShort(w.startD)} week`;
+    const name = state.weekOffset === 0 ? "This week" : state.weekOffset === -1 ? "Last week" : state.weekOffset === 1 ? "Next week" : `Week of ${fmtShort(w.startD)}`;
     $("#weekLabel").innerHTML = `${name}<small>${fmtShort(w.startD)} – ${fmtShort(w.endD)}</small>`;
-    $("#syncText").textContent = state.data ? `Updated ${ago(state.data.fetchedAt)}` : (state.error ? "Offline" : "Syncing…");
+    $("#syncText").textContent = state.data ? `Updated ${ago(state.data.fetchedAt)} from PlayHQ` : (state.error ? "Offline" : "Syncing with PlayHQ…");
   }
 
-  function gameRow(t, g, mode) {
+  function scoreHtml(g, r) {
+    return `<div class="score">${r.hasScore ? `<div class="nums">${g.score}–${g.oppScore}</div>` : ""}<span class="chip ${r.letter}">${esc(r.label)}</span></div>`;
+  }
+
+  function gameRow(t, g) {
     const { coach, code } = teamBits(t.name);
     const fav = state.favs.has(t.id);
     const r = result(g);
-    const vs = `${g.home ? "vs" : "@"} ${esc(g.opponent)}`;
-    let right;
-    if (mode === "results" && r) {
-      right = `<div class="score">${r.hasScore ? `<div class="nums">${g.score}–${g.oppScore}</div>` : ""}<span class="chip ${r.letter}">${esc(r.label)}</span></div>`;
-    } else if (r) {
-      right = `<div class="score">${r.hasScore ? `<div class="nums">${g.score}–${g.oppScore}</div>` : ""}<span class="chip ${r.letter}">${esc(r.label)}</span></div>`;
-    } else {
-      right = `<div class="where"><b>${esc(g.court || "Court TBC")}</b>${esc(venue(g.venue))}</div>`;
-    }
-    const status = g.status && !["UPCOMING", "COMPLETED", "FINAL"].includes(String(g.status).toUpperCase()) && !r ? ` · ${esc(g.statusLabel || g.status)}` : "";
-    return `<button type="button" class="game${fav ? " fav" : ""}" data-team="${t.id}">
-      <div class="when">${fmtTime(g.time)}<small>${g.date ? parseYmd(g.date).toLocaleDateString("en-AU", { weekday: "short" }) : ""}</small></div>
-      <div class="who"><div class="team">${code ? `<span class="code">${esc(code)}</span>` : ""}<span class="coach">${esc(coach)}${fav ? ' <span class="star" aria-label="Favourite">★</span>' : ""}</span></div><div class="vs">${vs}${status}</div></div>
-      ${right}</button>`;
+    const odd = g.status && !["UPCOMING", "COMPLETED", "FINAL"].includes(String(g.status).toUpperCase()) && !r ? ` · ${esc(g.statusLabel || g.status)}` : "";
+    const side = r ? scoreHtml(g, r) : `<div class="court">${esc(g.court || "Court TBC")}</div><span class="venue">${esc(venue(g.venue))}</span>`;
+    const vsLine = `${g.home ? "vs" : "@"} ${esc(g.opponent)}${!r && g.venue ? `<span class="m-venue"> · ${esc(venue(g.venue))}</span>` : ""}${odd}`;
+    return `<button type="button" class="game${fav ? " fav" : ""}${r ? " results" : ""}" data-team="${t.id}">
+      <div class="when">${fmtTime(g.time)}<small>${g.date ? dow(g.date) : ""}</small></div>
+      <div class="team">${code ? `<span class="code">${esc(code)}</span>` : ""}<span class="nm">${esc(coach)}${fav ? ' <span class="star" aria-label="My team">★</span>' : ""}</span></div>
+      <div class="vs">${vsLine}</div>
+      <div class="side">${side}</div></button>`;
   }
 
   function renderWeek(mode) {
     const { start, end } = weekRange(state.weekOffset);
-    const rows = [];
-    const byes = [];
+    const rows = [], byes = [];
     for (const t of teamsFiltered()) {
       for (const g of t.games) {
-        if (!g.date && !g.bye) continue;
         if (g.bye) {
-          // a bye has no date of its own; place it in the week where that round's other games fall
-          const roundDate = (state.data.teams.flatMap(x => x.games).find(x => x.round === g.round && x.date) || {}).date;
-          if (roundDate && roundDate >= start && roundDate <= end && mode === "games") byes.push(t);
+          const rd = (state.data.teams.flatMap(x => x.games).find(x => x.round === g.round && x.date) || {}).date;
+          if (rd && rd >= start && rd <= end && mode === "games") byes.push(t);
           continue;
         }
-        if (g.date < start || g.date > end) continue;
-        const r = result(g);
-        if (mode === "results" && !r) continue;
+        if (!g.date || g.date < start || g.date > end) continue;
+        if (mode === "results" && !result(g)) continue;
         rows.push({ t, g });
       }
     }
-    rows.sort((a, b) => (state.favs.has(b.t.id) - state.favs.has(a.t.id)) || (a.g.date + (a.g.time || "")).localeCompare(b.g.date + (b.g.time || "")) || a.t.name.localeCompare(b.t.name));
+    rows.sort((a, b) => (a.g.date + (a.g.time || "")).localeCompare(b.g.date + (b.g.time || "")) || a.t.name.localeCompare(b.t.name));
 
     let html = state.error ? `<div class="notice">${esc(state.error)}</div>` : "";
-
     if (!rows.length) {
       if (mode === "results") {
-        const anyThisWeek = teamsFiltered().some(t => t.games.some(g => g.date && g.date >= start && g.date <= end));
+        const any = teamsFiltered().some(t => t.games.some(g => g.date && g.date >= start && g.date <= end));
         const target = latestResultsOffset();
-        html += `<div class="empty"><h3>${anyThisWeek ? "No scores in yet" : "No games this week"}</h3>
-          ${anyThisWeek ? "Results show up here once scores are entered in PlayHQ after the games." : "Nothing was scheduled for this week."}
-          ${target != null && target !== state.weekOffset ? `<div><button type="button" data-goto="${target}">Show latest results</button></div>` : ""}</div>`;
+        html += `<div class="empty"><h3>${any ? "No scores in yet" : "No games this week"}</h3>
+          ${any ? "Scores show up here once they're entered in PlayHQ after the games." : "Nothing was scheduled for this week."}
+          ${target != null && target !== state.weekOffset ? `<div><button class="btn" type="button" data-goto="${target}">Show latest results</button></div>` : ""}</div>`;
       } else {
         const next = nextGamesOffset();
-        html += `<div class="empty"><h3>No games this week</h3>Could be a bye round, a public holiday or the fixture isn't out yet.
-          ${next != null && next !== state.weekOffset ? `<div><button type="button" data-goto="${next}">Jump to next games</button></div>` : ""}</div>`;
+        html += `<div class="empty"><h3>No games this week</h3>Could be a bye round, a public holiday, or the fixture isn't out yet.
+          ${next != null && next !== state.weekOffset ? `<div><button class="btn" type="button" data-goto="${next}">Jump to next games</button></div>` : ""}</div>`;
       }
       return html;
     }
 
-    // Summary
     if (mode === "results") {
       const c = { W: 0, L: 0, D: 0 };
       rows.forEach(({ g }) => { const r = result(g); if (c[r.letter] != null) c[r.letter]++; });
       html += `<div class="summary"><span><b>${rows.length}</b>results</span><span><b>${c.W}</b>wins</span><span><b>${c.L}</b>losses</span>${c.D ? `<span><b>${c.D}</b>draws</span>` : ""}</div>`;
     } else {
       const days = [...new Set(rows.map(r => r.g.date))].sort();
-      const venues = new Set(rows.map(r => venue(r.g.venue)).filter(Boolean));
-      html += `<div class="summary"><span><b>${rows.length}</b>games</span><span>${days.map(fmtDay).join(" & ")}</span>${venues.size ? `<span>${[...venues].map(esc).join(" · ")}</span>` : ""}</div>`;
+      html += `<div class="summary"><span><b>${rows.length}</b>games</span><span>${days.map(fmtDay).join(" · ")}</span></div>`;
     }
 
     const favRows = rows.filter(r => state.favs.has(r.t.id));
     if (favRows.length && state.age === "all") {
-      html += `<section class="band"><div class="band-head"><h2>★ My teams</h2></div><div class="list">${favRows.map(r => gameRow(r.t, r.g, mode)).join("")}</div></section>`;
+      html += `<section class="group"><div class="group-head"><h2>★ My teams</h2></div><div class="list">${favRows.map(r => gameRow(r.t, r.g)).join("")}</div></section>`;
     }
     for (const [age, list] of groupByAge(rows, r => r.t.age)) {
       const ageByes = byes.filter(t => t.age === age);
-      html += `<section class="band"><div class="band-head"><h2>${age === "Other" ? "Other" : "U" + age}</h2><span>${list.length} game${list.length === 1 ? "" : "s"}</span></div>
-        <div class="list">${list.map(r => gameRow(r.t, r.g, mode)).join("")}
+      html += `<section class="group"><div class="group-head"><h2>${age === "Other" ? "Other" : "U" + age}</h2><span>${list.length} game${list.length === 1 ? "" : "s"}</span></div>
+        <div class="list">${list.map(r => gameRow(r.t, r.g)).join("")}
         ${ageByes.map(t => { const b = teamBits(t.name); return `<div class="bye"><span class="code">${esc(b.code)}</span>${esc(b.coach)} has a bye</div>`; }).join("")}</div></section>`;
     }
     return html;
   }
 
+  function offsetOf(dateStr) { return Math.floor((parseYmd(dateStr) - weekRange(0).startD) / (7 * 864e5)); }
   function nextGamesOffset() {
-    const all = teamsFiltered().flatMap(t => t.games.filter(g => g.date)).map(g => g.date).sort();
     const today = ymd(new Date());
-    const next = all.find(d => d >= today);
+    const next = teamsFiltered().flatMap(t => t.games.filter(g => g.date)).map(g => g.date).sort().find(d => d >= today);
     return next ? offsetOf(next) : null;
   }
   function latestResultsOffset() {
     const done = teamsFiltered().flatMap(t => t.games.filter(g => g.date && result(g))).map(g => g.date).sort();
     return done.length ? offsetOf(done[done.length - 1]) : null;
   }
-  function offsetOf(dateStr) {
-    const w0 = weekRange(0).startD;
-    const d = parseYmd(dateStr);
-    return Math.floor((d - w0) / (7 * 864e5));
+  function hasResultsIn(offset) {
+    const { start, end } = weekRange(offset);
+    return teamsFiltered().some(t => t.games.some(g => g.date && g.date >= start && g.date <= end && result(g)));
   }
 
   function renderTeams() {
@@ -457,12 +522,12 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
     const ts = teamsFiltered();
     if (!ts.length) return html + `<div class="empty"><h3>No teams found</h3>PlayHQ didn't return any teams for this season.</div>`;
     for (const [age, list] of groupByAge(ts, t => t.age)) {
-      html += `<section class="band"><div class="band-head"><h2>${age === "Other" ? "Other" : "U" + age}</h2><span>${list.length} team${list.length === 1 ? "" : "s"}</span></div><div class="teams">${
+      html += `<section class="group"><div class="group-head"><h2>${age === "Other" ? "Other" : "U" + age}</h2><span>${list.length} team${list.length === 1 ? "" : "s"}</span></div><div class="teams">${
         list.map(t => {
           const b = teamBits(t.name); const r = record(t); const played = r.W + r.L + r.D;
           return `<button type="button" class="teamcard" data-team="${t.id}"><span class="code">${esc(b.code)}</span>
             <span class="meta"><div>${esc(b.coach)}${state.favs.has(t.id) ? ' <span class="star">★</span>' : ""}</div><small>Grade ${esc(t.grade || "–")}</small></span>
-            <span class="rec">${played ? `${r.W}–${r.L}${r.D ? "–" + r.D : ""}` : ""}</span></button>`;
+            <span class="rec">${played ? `${r.W}W ${r.L}L${r.D ? " " + r.D + "D" : ""}` : ""}</span></button>`;
         }).join("")}</div></section>`;
     }
     return html;
@@ -473,7 +538,7 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
     const main = $("#main");
     if (!state.data) {
       main.innerHTML = state.error
-        ? `<div class="empty"><h3>Can't load fixtures</h3>${esc(state.error)}<div><button type="button" id="retry">Try again</button></div></div>`
+        ? `<div class="empty"><h3>Can't load fixtures</h3>${esc(state.error)}<div><button class="btn" type="button" id="retry">Try again</button></div></div>`
         : `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
       return;
     }
@@ -487,28 +552,23 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
     const t = state.data?.teams.find(x => x.id === id);
     if (!t) return;
     openTeamId = id;
-    const b = teamBits(t.name);
-    const r = record(t);
-    const fav = state.favs.has(t.id);
-    const today = ymd(new Date());
+    const b = teamBits(t.name), r = record(t), fav = state.favs.has(t.id), today = ymd(new Date());
     const nextIdx = t.games.findIndex(g => g.date && g.date >= today && !result(g));
     const rows = t.games.map((g, i) => {
       if (!g.confirmed) return `<div class="round tbc"><div class="rn"><small>RD</small>${g.roundNo}</div><div class="d"><div>Fixture not confirmed yet</div></div><span></span></div>`;
       if (g.bye) return `<div class="round"><div class="rn"><small>RD</small>${g.roundNo}</div><div class="d"><div>Bye</div><small>No game this round</small></div><span></span></div>`;
       const res = result(g);
-      const right = res
-        ? `<div class="score">${res.hasScore ? `<div class="nums">${g.score}–${g.oppScore}</div>` : ""}<span class="chip ${res.letter}">${esc(res.label)}</span></div>`
-        : `<div class="where"><b>${fmtTime(g.time)}</b>${esc(g.court || "")}</div>`;
+      const right = res ? scoreHtml(g, res) : `<div style="text-align:right"><div class="court">${fmtTime(g.time)}</div><span class="venue" style="display:block">${esc(g.court || "")}</span></div>`;
       return `<div class="round${i === nextIdx ? " now" : ""}"><div class="rn"><small>RD</small>${g.roundNo}</div>
         <div class="d"><div>${g.home ? "vs" : "@"} ${esc(g.opponent)}</div><small>${g.date ? fmtDay(g.date) : "Date TBC"}${g.venue ? " · " + esc(venue(g.venue)) : ""}</small></div>${right}</div>`;
     }).join("");
     const played = r.W + r.L + r.D;
-    $("#panel").innerHTML = `<div class="panel-head"><span class="code" style="font-size:16px;padding:7px 9px">${esc(b.code)}</span>
+    $("#panel").innerHTML = `<div class="panel-top"><div class="grab"></div><div class="panel-head"><span class="code">${esc(b.code)}</span>
       <div><h2 id="sheetTitle">${esc(b.coach)}</h2><p>U${t.age ?? "?"} · Grade ${esc(t.grade || "–")}${played ? ` · ${r.W}W ${r.L}L${r.D ? ` ${r.D}D` : ""}` : ""}</p></div>
-      <button type="button" class="x" id="closeSheet" aria-label="Close">✕</button></div>
-      <div class="panel-actions"><button type="button" class="pill${fav ? " on" : ""}" id="favBtn">${fav ? "★ My team" : "☆ Add to my teams"}</button>
+      <button type="button" class="iconbtn" id="closeSheet" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+      <div class="panel-body"><div class="panel-actions"><button type="button" class="pill${fav ? " on" : ""}" id="favBtn">${fav ? "★ My team" : "☆ Add to my teams"}</button>
       <a class="pill" href="${teamUrl(t)}" target="_blank" rel="noopener">Open on PlayHQ ↗</a></div>
-      <div class="rounds">${rows || '<div class="empty">No fixture yet.</div>'}</div>`;
+      <div class="rounds">${rows || '<div class="empty">No fixture yet.</div>'}</div></div>`;
     const sheet = $("#sheet");
     if (sheet.hidden) { sheet.hidden = false; $("#closeSheet").focus(); }
     document.body.style.overflow = "hidden";
@@ -516,17 +576,24 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
   function closeTeam() { openTeamId = null; $("#sheet").hidden = true; document.body.style.overflow = ""; }
 
   // ---------- events ----------
+  function setView(v) {
+    state.view = v;
+    if (v === "results" && !hasResultsIn(state.weekOffset)) { const o = latestResultsOffset(); if (o != null && o <= 0) state.weekOffset = o; }
+    render(); window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function stepWeek(d) { state.weekOffset += d; render(); }
   document.addEventListener("click", (e) => {
     const el = e.target.closest("button, [data-goto]");
     if (!el) { if (e.target.id === "sheet") closeTeam(); return; }
-    if (el.dataset.view) { state.view = el.dataset.view; if (el.dataset.view === "results") { const o = latestResultsOffset(); if (o != null && o <= 0 && o !== state.weekOffset && !hasResultsIn(state.weekOffset)) state.weekOffset = o; } render(); return; }
+    if (el.dataset.view) return setView(el.dataset.view);
     if (el.dataset.age) { state.age = el.dataset.age; render(); return; }
     if (el.dataset.goto != null) { state.weekOffset = Number(el.dataset.goto); render(); return; }
-    if (el.dataset.team) { openTeam(el.dataset.team); return; }
+    if (el.dataset.team) return openTeam(el.dataset.team);
     switch (el.id) {
-      case "prevWeek": state.weekOffset--; render(); break;
-      case "nextWeek": state.weekOffset++; render(); break;
+      case "prevWeek": stepWeek(-1); break;
+      case "nextWeek": stepWeek(1); break;
       case "refresh": case "retry": sync(); break;
+      case "themeBtn": cycleTheme(); break;
       case "closeSheet": closeTeam(); break;
       case "favBtn":
         state.favs.has(openTeamId) ? state.favs.delete(openTeamId) : state.favs.add(openTeamId);
@@ -534,20 +601,31 @@ footer { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
     }
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#sheet").hidden) closeTeam(); });
-  function hasResultsIn(offset) {
-    const { start, end } = weekRange(offset);
-    return teamsFiltered().some(t => t.games.some(g => g.date && g.date >= start && g.date <= end && result(g)));
-  }
-  // Re-sync when someone comes back to the tab (e.g. after the games on Friday night).
+
+  // Swipe left/right on the list to change week.
+  let sx = 0, sy = 0, st = 0;
+  const mainEl = $("#main");
+  mainEl.addEventListener("touchstart", (e) => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); }, { passive: true });
+  mainEl.addEventListener("touchend", (e) => {
+    if (state.view === "teams") return;
+    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 70 && Math.abs(dy) < 45 && Date.now() - st < 600) stepWeek(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  // Swipe down on the team sheet header to close it.
+  let py = 0;
+  $("#sheet").addEventListener("touchstart", (e) => { if (e.target.closest(".panel-top")) py = e.touches[0].clientY; else py = 0; }, { passive: true });
+  $("#sheet").addEventListener("touchend", (e) => { if (py && e.changedTouches[0].clientY - py > 80) closeTeam(); }, { passive: true });
+
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && state.data && Date.now() - new Date(state.data.fetchedAt) > 5 * 60e3) sync();
   });
-  setInterval(() => { if (state.data) $("#syncText").textContent = `Updated ${ago(state.data.fetchedAt)}`; }, 30e3);
+  setInterval(() => { if (state.data) $("#syncText").textContent = `Updated ${ago(state.data.fetchedAt)} from PlayHQ`; }, 30e3);
 
-  // ---------- start: show last saved copy instantly, then fetch fresh ----------
+  // ---------- start ----------
+  applyTheme(currentTheme());
   const cached = store.get(CACHE_KEY, null);
-  state.firstLoad = true;
-  if (cached?.teams) { state.data = cached; state.firstLoad = false; pickStartWeek(); state.firstLoad = true; }
+  if (cached?.teams) { state.data = cached; pickStartWeek(); }
   render();
   sync();
 })();
