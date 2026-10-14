@@ -101,6 +101,14 @@ a { color: var(--accent); }
 .ages button { flex: none; min-height: 38px; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 0 15px; font: 800 14px/1 var(--display); font-stretch: 90%; cursor: pointer; }
 .ages button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
+/* ---------- Juniors | Open switch ---------- */
+.comp { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 12px; padding: 4px; background: var(--soft); border-radius: 14px; }
+.comp button { border: 0; background: none; min-height: 42px; border-radius: 11px; cursor: pointer; color: var(--muted); font: 900 15px/1 var(--display); font-stretch: 90%; letter-spacing: .05em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.comp button[aria-selected="true"] { background: var(--card); color: var(--accent); box-shadow: var(--shadow), 0 0 0 1px var(--line); }
+.comp .n { font: 800 11px/1 var(--body); letter-spacing: 0; padding: 3px 7px; border-radius: 999px; background: var(--bg); color: var(--muted); }
+.comp button[aria-selected="true"] .n { background: var(--accent); color: var(--accent-ink); }
+.ha.comp { margin-left: 2px; background: var(--accent); color: var(--accent-ink); }
+
 /* ---------- Tabs: top on desktop, bottom bar on phones ---------- */
 .tabs { display: flex; gap: 4px; background: var(--soft); border-radius: 999px; padding: 4px; flex: none; }
 .tabs button { border: 0; background: none; padding: 9px 16px; border-radius: 999px; font: 800 14px/1 var(--display); font-stretch: 90%; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; color: var(--muted); display: flex; align-items: center; gap: 7px; }
@@ -245,6 +253,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
 
 <div class="bar">
   <div class="wrap">
+    <div class="comp" id="comp" role="tablist" aria-label="Competition"></div>
     <div class="bar-row">
       <div class="week" id="weekNav">
         <button type="button" id="prevWeek" aria-label="Previous week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -253,7 +262,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
       </div>
       <nav class="tabs" role="tablist" aria-label="View" data-tabs></nav>
     </div>
-    <div class="ages" id="ages" role="group" aria-label="Age group"></div>
+    <div class="ages" id="ages" role="group" aria-label="Filter teams"></div>
   </div>
 </div>
 
@@ -294,8 +303,12 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
 <script>
 (() => {
   const API = "https://zpsukddhnpnjphgfelkh.supabase.co/functions/v1/smaa-playhq";
-  const PLAYHQ_TEAM = "https://www.playhq.com/netball-australia/org/st-michael-and-all-angels/72bc9771/saucna-summer-juniors-summer-202627/teams/";
-  const CACHE_KEY = "smaa-dash-v1";
+  const PLAYHQ_ORG = "https://www.playhq.com/netball-australia/org/st-michael-and-all-angels/72bc9771/";
+  // Each competition is its own PlayHQ season. Juniors group by age, Open by grade letter.
+  const COMPS = {
+    juniors: { label: "Juniors", season: "e2eff7a5", path: "saucna-summer-juniors-summer-202627", cache: "smaa-dash-v1" },
+    open:    { label: "Open",    season: "838ec857", path: "saucna-summer-open-summer-202627",    cache: "smaa-dash-open-v1" },
+  };
   const FAV_KEY = "smaa-favs-v1";
   const THEME_KEY = "smaa-theme";
   const DONE = new Set(["COMPLETED", "FINAL", "FINALISED", "FORFEIT", "WALKOVER", "PLAYED"]);
@@ -318,9 +331,15 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   };
 
   const state = {
-    data: null, view: "games", age: "all", weekOffset: 0,
-    favs: new Set(store.get(FAV_KEY, [])), error: null, firstLoad: true,
+    comp: "juniors",           // everyone lands on Juniors
+    all: {}, errors: {},
+    view: "games", age: "all", weekOffset: 0,
+    favs: new Set(store.get(FAV_KEY, [])), firstLoad: true,
   };
+  Object.defineProperty(state, "data", { get() { return state.all[state.comp] || null; } });
+  Object.defineProperty(state, "error", { get() { return state.errors[state.comp] || null; } });
+  const allTeams = () => Object.values(state.all).flatMap(d => d?.teams || []);
+  function tagTeams(comp, data) { (data?.teams || []).forEach(t => { t.comp = comp; }); return data; }
 
   // ---------- theme ----------
   function currentTheme() {
@@ -368,13 +387,17 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   }
 
   // ---------- team helpers ----------
-  function teamBits(name) {
-    const clean = name.replace(/^SMAA\s+/i, "").replace(/\s+/g, " ").trim();
+  function teamBits(t) {
+    const clean = t.name.replace(/^SMAA\s+/i, "").replace(/\s+/g, " ").trim();
+    if (t.comp === "open") return { coach: clean, code: (t.grade || "").toUpperCase() };
     const m = clean.match(/^(.*?)\s*(\d{1,2}\s*[A-Z])$/i);
     return m ? { coach: m[1].trim() || clean, code: m[2].replace(/\s+/g, "").toUpperCase() } : { coach: clean, code: "" };
   }
   const slug = (name) => name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
-  const teamUrl = (t) => PLAYHQ_TEAM + slug(t.name) + "/" + t.id;
+  const teamUrl = (t) => PLAYHQ_ORG + (COMPS[t.comp] || COMPS.juniors).path + "/teams/" + slug(t.name) + "/" + t.id;
+  // Grouping key: age for Juniors (8, 9, 11…), grade letter for Open (A, C, D…).
+  const keyOf = (t) => t.comp === "open" ? ((t.grade || "").match(/^[A-Z]/i)?.[0]?.toUpperCase() || null) : t.age;
+  const keyLabel = (k, comp) => k === "Other" ? "Other" : comp === "open" ? `${k} Grade` : `U${k}`;
   const ha = (g) => g.home == null ? "" : `<span class="ha ${g.home ? "home" : "away"}">${g.home ? "Home" : "Away"}</span>`;
   const venue = (v) => VENUE_SHORT[v] || v || "";
 
@@ -398,16 +421,20 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     document.body.classList.add("loading");
     if (!state.data) $("#syncText").textContent = "Syncing with PlayHQ…";
     try {
-      const res = await fetch(API, { cache: "no-store" });
-      const body = await res.json();
-      if (!res.ok || body.error) throw new Error(body.error || `HTTP ${res.status}`);
-      state.data = body; state.error = null;
-      store.set(CACHE_KEY, body);
-      if (state.firstLoad) { state.firstLoad = false; pickStartWeek(); }
-    } catch (e) {
-      state.error = state.data
-        ? "Couldn't reach PlayHQ just now, so you're seeing the last saved copy."
-        : "Couldn't reach PlayHQ. Check your connection and tap sync to try again.";
+      await Promise.all(Object.entries(COMPS).map(async ([key, c]) => {
+        try {
+          const res = await fetch(`${API}?season=${c.season}`, { cache: "no-store" });
+          const body = await res.json();
+          if (!res.ok || body.error) throw new Error(body.error || `HTTP ${res.status}`);
+          state.all[key] = tagTeams(key, body); state.errors[key] = null;
+          store.set(c.cache, body);
+        } catch (e) {
+          state.errors[key] = state.all[key]
+            ? "Couldn't reach PlayHQ just now, so you're seeing the last saved copy."
+            : "Couldn't reach PlayHQ. Check your connection and tap sync to try again.";
+        }
+      }));
+      if (state.firstLoad && state.data) { state.firstLoad = false; pickStartWeek(); }
     } finally {
       document.body.classList.remove("loading");
       render();
@@ -424,17 +451,21 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   // ---------- render ----------
   function teamsFiltered() {
     const ts = state.data?.teams || [];
-    return state.age === "all" ? ts : ts.filter(t => String(t.age) === state.age);
+    return state.age === "all" ? ts : ts.filter(t => String(keyOf(t)) === state.age);
   }
   function groupByAge(items, getAge) {
     const map = new Map();
     for (const it of items) { const a = getAge(it) ?? "Other"; if (!map.has(a)) map.set(a, []); map.get(a).push(it); }
-    return [...map.entries()].sort((a, b) => (a[0] === "Other") - (b[0] === "Other") || a[0] - b[0]);
+    return [...map.entries()].sort((a, b) => (a[0] === "Other") - (b[0] === "Other") || (typeof a[0] === "number" ? a[0] - b[0] : String(a[0]).localeCompare(String(b[0]))));
   }
 
   function renderChrome() {
-    const ages = [...new Set((state.data?.teams || []).map(t => t.age).filter(a => a != null))].sort((a, b) => a - b);
-    $("#ages").innerHTML = [["all", "All ages"], ...ages.map(a => [String(a), "U" + a])]
+    $("#comp").innerHTML = Object.entries(COMPS).map(([k, c]) => {
+      const n = state.all[k]?.teams?.length;
+      return `<button type="button" role="tab" data-comp="${k}" aria-selected="${state.comp === k}">${c.label}${n ? `<span class="n">${n}</span>` : ""}</button>`;
+    }).join("");
+    const keys = [...new Set((state.data?.teams || []).map(keyOf).filter(a => a != null))].sort((a, b) => typeof a === "number" ? a - b : String(a).localeCompare(String(b)));
+    $("#ages").innerHTML = [["all", state.comp === "open" ? "All grades" : "All ages"], ...keys.map(a => [String(a), keyLabel(a, state.comp)])]
       .map(([v, l]) => `<button type="button" data-age="${v}" aria-pressed="${state.age === v}">${l}</button>`).join("");
     const tabs = [["games", "Games"], ["results", "Results"], ["teams", "Teams"]]
       .map(([v, l]) => `<button role="tab" type="button" data-view="${v}" aria-selected="${state.view === v}">${ICONS[v]}<span>${l}</span></button>`).join("");
@@ -451,7 +482,8 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   }
 
   function gameRow(t, g) {
-    const { coach, code } = teamBits(t.name);
+    const { coach, code } = teamBits(t);
+    const other = t.comp !== state.comp ? `<span class="ha comp">${COMPS[t.comp].label}</span>` : "";
     const fav = state.favs.has(t.id);
     const r = result(g);
     const odd = g.status && !["UPCOMING", "COMPLETED", "FINAL"].includes(String(g.status).toUpperCase()) && !r ? ` · ${esc(g.statusLabel || g.status)}` : "";
@@ -459,7 +491,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     const vsLine = `vs ${esc(g.opponent)}${ha(g)}${!r && g.venue ? `<span class="m-venue"> · ${esc(venue(g.venue))}</span>` : ""}${odd}`;
     return `<button type="button" class="game${fav ? " fav" : ""}${r ? " results" : ""}" data-team="${t.id}">
       <div class="when">${fmtTime(g.time)}<small>${g.date ? dow(g.date) : ""}</small></div>
-      <div class="team">${code ? `<span class="code">${esc(code)}</span>` : ""}<span class="nm">${esc(coach)}${fav ? ' <span class="star" aria-label="My team">★</span>' : ""}</span></div>
+      <div class="team">${code ? `<span class="code">${esc(code)}</span>` : ""}<span class="nm">${esc(coach)}${fav ? ' <span class="star" aria-label="My team">★</span>' : ""}</span>${other}</div>
       <div class="vs">${vsLine}</div>
       <div class="side">${side}</div></button>`;
   }
@@ -470,7 +502,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     for (const t of teamsFiltered()) {
       for (const g of t.games) {
         if (g.bye) {
-          const rd = (state.data.teams.flatMap(x => x.games).find(x => x.round === g.round && x.date) || {}).date;
+          const rd = ((state.all[t.comp] || state.data).teams.flatMap(x => x.games).find(x => x.round === g.round && x.date) || {}).date;
           if (rd && rd >= start && rd <= end && mode === "games") byes.push(t);
           continue;
         }
@@ -506,15 +538,25 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
       html += `<div class="summary"><span><b>${rows.length}</b>games</span><span>${days.map(fmtDay).join(" · ")}</span></div>`;
     }
 
-    const favRows = rows.filter(r => state.favs.has(r.t.id));
+    // ★ My teams pulls starred teams from both competitions.
+    const favRows = [];
+    for (const t of allTeams()) {
+      if (!state.favs.has(t.id)) continue;
+      for (const g of t.games) {
+        if (g.bye || !g.date || g.date < start || g.date > end) continue;
+        if (mode === "results" && !result(g)) continue;
+        favRows.push({ t, g });
+      }
+    }
+    favRows.sort((a, b) => (a.g.date + (a.g.time || "")).localeCompare(b.g.date + (b.g.time || "")));
     if (favRows.length && state.age === "all") {
       html += `<section class="group"><div class="group-head"><h2>★ My teams</h2></div><div class="list">${favRows.map(r => gameRow(r.t, r.g)).join("")}</div></section>`;
     }
-    for (const [age, list] of groupByAge(rows, r => r.t.age)) {
-      const ageByes = byes.filter(t => t.age === age);
-      html += `<section class="group"><div class="group-head"><h2>${age === "Other" ? "Other" : "U" + age}</h2><span>${list.length} game${list.length === 1 ? "" : "s"}</span></div>
+    for (const [age, list] of groupByAge(rows, r => keyOf(r.t))) {
+      const ageByes = byes.filter(t => keyOf(t) === age);
+      html += `<section class="group"><div class="group-head"><h2>${keyLabel(age, state.comp)}</h2><span>${list.length} game${list.length === 1 ? "" : "s"}</span></div>
         <div class="list">${list.map(r => gameRow(r.t, r.g)).join("")}
-        ${ageByes.map(t => { const b = teamBits(t.name); return `<div class="bye"><span class="code">${esc(b.code)}</span>${esc(b.coach)} has a bye</div>`; }).join("")}</div></section>`;
+        ${ageByes.map(t => { const b = teamBits(t); return `<div class="bye"><span class="code">${esc(b.code)}</span>${esc(b.coach)} has a bye</div>`; }).join("")}</div></section>`;
     }
     return html;
   }
@@ -538,10 +580,10 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     let html = state.error ? `<div class="notice">${esc(state.error)}</div>` : "";
     const ts = teamsFiltered();
     if (!ts.length) return html + `<div class="empty"><h3>No teams found</h3>PlayHQ didn't return any teams for this season.</div>`;
-    for (const [age, list] of groupByAge(ts, t => t.age)) {
-      html += `<section class="group"><div class="group-head"><h2>${age === "Other" ? "Other" : "U" + age}</h2><span>${list.length} team${list.length === 1 ? "" : "s"}</span></div><div class="teams">${
+    for (const [age, list] of groupByAge(ts, t => keyOf(t))) {
+      html += `<section class="group"><div class="group-head"><h2>${keyLabel(age, state.comp)}</h2><span>${list.length} team${list.length === 1 ? "" : "s"}</span></div><div class="teams">${
         list.map(t => {
-          const b = teamBits(t.name); const r = record(t); const played = r.W + r.L + r.D;
+          const b = teamBits(t); const r = record(t); const played = r.W + r.L + r.D;
           return `<button type="button" class="teamcard" data-team="${t.id}"><span class="code">${esc(b.code)}</span>
             <span class="meta"><div>${esc(b.coach)}${state.favs.has(t.id) ? ' <span class="star">★</span>' : ""}</div><small>Grade ${esc(t.grade || "–")}</small></span>
             <span class="rec">${played ? `${r.W}W ${r.L}L${r.D ? " " + r.D + "D" : ""}` : ""}</span></button>`;
@@ -566,10 +608,10 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   // ---------- team sheet ----------
   let openTeamId = null;
   function openTeam(id) {
-    const t = state.data?.teams.find(x => x.id === id);
+    const t = allTeams().find(x => x.id === id);
     if (!t) return;
     openTeamId = id;
-    const b = teamBits(t.name), r = record(t), fav = state.favs.has(t.id), today = ymd(new Date());
+    const b = teamBits(t), r = record(t), fav = state.favs.has(t.id), today = ymd(new Date());
     const nextIdx = t.games.findIndex(g => g.date && g.date >= today && !result(g));
     const rows = t.games.map((g, i) => {
       if (!g.confirmed) return `<div class="round tbc"><div class="rn"><small>RD</small>${g.roundNo}</div><div class="d"><div>Fixture not confirmed yet</div></div><span></span></div>`;
@@ -581,7 +623,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     }).join("");
     const played = r.W + r.L + r.D;
     $("#panel").innerHTML = `<div class="panel-top"><div class="grab"></div><div class="panel-head"><span class="code">${esc(b.code)}</span>
-      <div><h2 id="sheetTitle">${esc(b.coach)}</h2><p>U${t.age ?? "?"} · Grade ${esc(t.grade || "–")}${played ? ` · ${r.W}W ${r.L}L${r.D ? ` ${r.D}D` : ""}` : ""}</p></div>
+      <div><h2 id="sheetTitle">${esc(b.coach)}</h2><p>${t.comp === "open" ? "Open" : `U${t.age ?? "?"}`} · Grade ${esc(t.grade || "–")}${played ? ` · ${r.W}W ${r.L}L${r.D ? ` ${r.D}D` : ""}` : ""}</p></div>
       <button type="button" class="iconbtn" id="closeSheet" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
       <div class="panel-body"><div class="panel-actions"><button type="button" class="pill${fav ? " on" : ""}" id="favBtn">${fav ? "★ My team" : "☆ Add to my teams"}</button>
       <a class="pill" href="${teamUrl(t)}" target="_blank" rel="noopener">Open on PlayHQ ↗</a></div>
@@ -602,6 +644,10 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
   document.addEventListener("click", (e) => {
     const el = e.target.closest("button, [data-goto]");
     if (!el) { if (e.target.id === "sheet") closeTeam(); return; }
+    if (el.dataset.comp) {
+      if (el.dataset.comp !== state.comp) { state.comp = el.dataset.comp; state.age = "all"; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      return;
+    }
     if (el.dataset.view) return setView(el.dataset.view);
     if (el.dataset.age) { state.age = el.dataset.age; render(); return; }
     if (el.dataset.goto != null) { state.weekOffset = Number(el.dataset.goto); render(); return; }
@@ -641,8 +687,8 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
 
   // ---------- start ----------
   applyTheme(currentTheme());
-  const cached = store.get(CACHE_KEY, null);
-  if (cached?.teams) { state.data = cached; pickStartWeek(); }
+  for (const [k, c] of Object.entries(COMPS)) { const cached = store.get(c.cache, null); if (cached?.teams) state.all[k] = tagTeams(k, cached); }
+  if (state.data) pickStartWeek();
   render();
   sync();
 })();
