@@ -111,6 +111,25 @@ async function buildTeam(t: Json) {
 
 const cache = new Map<string, { at: number; body: string }>();
 
+// Adds one to today's visit count in the database. This is real database
+// activity, which stops Supabase pausing the free project while the club uses
+// the dashboard. It never blocks or breaks the response.
+const SB_URL = Deno.env.get("SUPABASE_URL");
+const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+function bumpVisit(): Promise<void> {
+  if (!SB_URL || !SB_KEY) return Promise.resolve();
+  return fetch(`${SB_URL}/rest/v1/rpc/smaa_bump_visit`, {
+    method: "POST",
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "content-type": "application/json" },
+    body: "{}",
+  }).then(() => {}, () => {});
+}
+function inBackground(p: Promise<void>) {
+  // deno-lint-ignore no-explicit-any
+  const rt = (globalThis as any).EdgeRuntime;
+  if (rt?.waitUntil) rt.waitUntil(p); else p.catch(() => {});
+}
+
 async function build(season: string) {
   const teams: Json[] = (await gql(TEAMS_Q, { org: ORG_ID, season })).discoverTeams ?? [];
   // A few at a time keeps us polite to PlayHQ while staying quick.
@@ -141,6 +160,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   const url = new URL(req.url);
   const season = (url.searchParams.get("season") ?? DEFAULT_SEASON).replace(/[^a-z0-9]/gi, "").slice(0, 16);
+  // The page asks for Juniors and Open together; count the Juniors request so each open counts once.
+  if (season === DEFAULT_SEASON) inBackground(bumpVisit());
   const hit = cache.get(season);
   if (hit && Date.now() - hit.at < CACHE_MS) {
     return new Response(hit.body, { headers: { ...CORS, "content-type": "application/json", "x-cache": "hit" } });
