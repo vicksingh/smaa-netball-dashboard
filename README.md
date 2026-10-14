@@ -11,4 +11,4 @@ A one-page dashboard for St Michael & All Angels junior netball. It shows this w
 
 ## New season
 
-When the next season starts, change `DEFAULT_SEASON` in the function (the code after the season name in the PlayHQ teams URL, e.g. `.../saucna-summer-juniors-summer-202627/e2eff7a5/teams` → `e2eff7a5`), and update the `PLAYHQ_TEAM` link path in `index.html`.
+The page shows two competitions, Juniors and Open, set in the `COMPS` list near the top of the script in `index.html`. When a new season starts, update each one's `season` code (the code after the season name in the PlayHQ teams URL, e.g. `.../saucna-summer-open-summer-202627/838ec857/teams` → `838ec857`) and its `path` (the season name part of that URL).
