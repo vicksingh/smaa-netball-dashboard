@@ -1,12 +1,18 @@
-// SMAA Netball — PlayHQ messenger
-// Fetches St Michael & All Angels teams and fixtures from PlayHQ's public
-// fixture feed and returns one tidy JSON bundle the dashboard can read.
+// Club dashboards — PlayHQ messenger (SMAA, Metro Jets)
+// Fetches a club's teams and fixtures from PlayHQ's public fixture feed and
+// returns one tidy JSON bundle the dashboard can read. Only clubs in CLUBS
+// below are allowed, so this can't be used as a general PlayHQ proxy.
 // Read-only, public data only. Results are cached for 60 seconds so a
 // crowd of parents opening the page at once doesn't hammer PlayHQ.
 
 const PLAYHQ = "https://api.playhq.com/graphql";
 const TENANT = "netball-australia";
-const ORG_ID = "72bc9771"; // St Michael & All Angels
+// PlayHQ org ID -> club key + name. SMAA is the default (its page sends no org).
+const CLUBS: Record<string, { key: string; name: string }> = {
+  "72bc9771": { key: "smaa", name: "St Michael & All Angels" },
+  "601b914e": { key: "metro-jets", name: "Metro Jets" },
+};
+const DEFAULT_ORG = "72bc9771";
 const DEFAULT_SEASON = "e2eff7a5"; // SAUCNA Summer Juniors, Summer 2026/27
 const CACHE_MS = 60_000;
 
@@ -116,12 +122,12 @@ const cache = new Map<string, { at: number; body: string }>();
 // the dashboard. It never blocks or breaks the response.
 const SB_URL = Deno.env.get("SUPABASE_URL");
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-function bumpVisit(): Promise<void> {
+function bumpVisit(club: string): Promise<void> {
   if (!SB_URL || !SB_KEY) return Promise.resolve();
-  return fetch(`${SB_URL}/rest/v1/rpc/smaa_bump_visit`, {
+  return fetch(`${SB_URL}/rest/v1/rpc/club_bump_visit`, {
     method: "POST",
     headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "content-type": "application/json" },
-    body: "{}",
+    body: JSON.stringify({ p_club: club }),
   }).then(() => {}, () => {});
 }
 function inBackground(p: Promise<void>) {
@@ -130,8 +136,8 @@ function inBackground(p: Promise<void>) {
   if (rt?.waitUntil) rt.waitUntil(p); else p.catch(() => {});
 }
 
-async function build(season: string) {
-  const teams: Json[] = (await gql(TEAMS_Q, { org: ORG_ID, season })).discoverTeams ?? [];
+async function build(org: string, season: string) {
+  const teams: Json[] = (await gql(TEAMS_Q, { org, season })).discoverTeams ?? [];
   // A few at a time keeps us polite to PlayHQ while staying quick.
   const out: Json[] = [];
   const queue = [...teams];
@@ -148,9 +154,9 @@ async function build(season: string) {
   await Promise.all(workers);
   out.sort((a, b) => (a.age ?? 99) - (b.age ?? 99) || a.name.localeCompare(b.name));
   return {
-    club: "St Michael & All Angels",
+    club: CLUBS[org].name,
     season,
-    orgId: ORG_ID,
+    orgId: org,
     fetchedAt: new Date().toISOString(),
     teams: out,
   };
@@ -159,16 +165,24 @@ async function build(season: string) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   const url = new URL(req.url);
+  const org = (url.searchParams.get("org") ?? DEFAULT_ORG).replace(/[^a-z0-9]/gi, "").slice(0, 16);
+  if (!CLUBS[org]) {
+    return new Response(JSON.stringify({ error: "Unknown club" }), { status: 403, headers: { ...CORS, "content-type": "application/json" } });
+  }
   const season = (url.searchParams.get("season") ?? DEFAULT_SEASON).replace(/[^a-z0-9]/gi, "").slice(0, 16);
-  // The page asks for Juniors and Open together; count the Juniors request so each open counts once.
-  if (season === DEFAULT_SEASON) inBackground(bumpVisit());
-  const hit = cache.get(season);
+  // Count each page open once: a page marks one of its requests with count=1.
+  // (SMAA's page predates that, so its Juniors request counts.)
+  const count = url.searchParams.get("count") === "1" ||
+    (!url.searchParams.has("count") && org === DEFAULT_ORG && season === DEFAULT_SEASON);
+  if (count) inBackground(bumpVisit(CLUBS[org].key));
+  const key = `${org}:${season}`;
+  const hit = cache.get(key);
   if (hit && Date.now() - hit.at < CACHE_MS) {
     return new Response(hit.body, { headers: { ...CORS, "content-type": "application/json", "x-cache": "hit" } });
   }
   try {
-    const body = JSON.stringify(await build(season));
-    cache.set(season, { at: Date.now(), body });
+    const body = JSON.stringify(await build(org, season));
+    cache.set(key, { at: Date.now(), body });
     return new Response(body, { headers: { ...CORS, "content-type": "application/json", "x-cache": "miss" } });
   } catch (e) {
     if (hit) {
