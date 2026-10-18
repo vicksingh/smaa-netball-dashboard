@@ -117,17 +117,18 @@ async function buildTeam(t: Json) {
 
 const cache = new Map<string, { at: number; body: string }>();
 
-// Adds one to today's visit count in the database. This is real database
-// activity, which stops Supabase pausing the free project while the club uses
-// the dashboard. It never blocks or breaks the response.
+// Adds one to today's visit count in the database, and notes the phone's random
+// ID (once per day) so we can count different phones. This is also real database
+// activity, which stops Supabase pausing the free project. It never blocks or
+// breaks the response.
 const SB_URL = Deno.env.get("SUPABASE_URL");
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-function bumpVisit(club: string): Promise<void> {
+function bumpVisit(club: string, device: string | null): Promise<void> {
   if (!SB_URL || !SB_KEY) return Promise.resolve();
-  return fetch(`${SB_URL}/rest/v1/rpc/club_bump_visit`, {
+  return fetch(`${SB_URL}/rest/v1/rpc/club_record_visit`, {
     method: "POST",
     headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify({ p_club: club }),
+    body: JSON.stringify({ p_club: club, p_device: device }),
   }).then(() => {}, () => {});
 }
 function inBackground(p: Promise<void>) {
@@ -174,7 +175,10 @@ Deno.serve(async (req) => {
   // (SMAA's page predates that, so its Juniors request counts.)
   const count = url.searchParams.get("count") === "1" ||
     (!url.searchParams.has("count") && org === DEFAULT_ORG && season === DEFAULT_SEASON);
-  if (count) inBackground(bumpVisit(CLUBS[org].key));
+  // d = the phone's random ID (made and kept on the phone); only used for counting.
+  const rawDevice = (url.searchParams.get("d") ?? "").toLowerCase();
+  const device = /^[a-z0-9-]{8,40}$/.test(rawDevice) ? rawDevice : null;
+  if (count) inBackground(bumpVisit(CLUBS[org].key, device));
   const key = `${org}:${season}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < CACHE_MS) {

@@ -330,6 +330,18 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
 
+  // A random ID this phone makes for itself and keeps (only used to count different phones).
+  const DEVICE = (() => {
+    const K = "club-device-id";
+    let id = null;
+    try { id = localStorage.getItem(K); } catch {}
+    if (!id || !/^[a-z0-9-]{8,40}$/.test(id)) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36)).toLowerCase();
+      try { localStorage.setItem(K, id); } catch {}
+    }
+    return id;
+  })();
+
   const state = {
     comp: "juniors",           // everyone lands on Juniors
     all: {}, errors: {},
@@ -423,7 +435,7 @@ footer { padding-block: 8px 28px; display: grid; gap: 14px; }
     try {
       await Promise.all(Object.entries(COMPS).map(async ([key, c]) => {
         try {
-          const res = await fetch(`${API}?season=${c.season}`, { cache: "no-store" });
+          const res = await fetch(`${API}?season=${c.season}&d=${DEVICE}`, { cache: "no-store" });
           const body = await res.json();
           if (!res.ok || body.error) throw new Error(body.error || `HTTP ${res.status}`);
           state.all[key] = tagTeams(key, body); state.errors[key] = null;
