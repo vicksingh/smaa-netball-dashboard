@@ -12,3 +12,9 @@ A one-page dashboard for St Michael & All Angels junior netball. It shows this w
 ## New season
 
 The page shows two competitions, Juniors and Open, set in the `COMPS` list near the top of the script in `index.html`. When a new season starts, update each one's `season` code (the code after the season name in the PlayHQ teams URL, e.g. `.../saucna-summer-open-summer-202627/838ec857/teams` → `838ec857`) and its `path` (the season name part of that URL).
+
+## Saved copy and rollback
+
+The messenger keeps the last good fixtures for each club in the `club_dashboard_cache` table. Visits within 60 seconds reuse it, and if PlayHQ refuses a request the saved copy is served instead of an error.
+
+To roll back to the version before this (Supabase v4), redeploy `backups/smaa-playhq-v4-2026-10-24.ts` as the `smaa-playhq` function.
