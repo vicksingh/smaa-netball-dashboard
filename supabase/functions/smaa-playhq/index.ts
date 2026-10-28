@@ -1,4 +1,4 @@
-// Club dashboards — PlayHQ messenger (SMAA, Metro Jets)
+// Club dashboards — PlayHQ messenger (SMAA, Metro Jets, Contax)
 // Fetches a club's teams and fixtures from PlayHQ's public fixture feed and
 // returns one tidy JSON bundle the dashboard can read. Only clubs in CLUBS
 // below are allowed, so this can't be used as a general PlayHQ proxy.
@@ -16,6 +16,7 @@ const TENANT = "netball-australia";
 const CLUBS: Record<string, { key: string; name: string }> = {
   "72bc9771": { key: "smaa", name: "St Michael & All Angels" },
   "601b914e": { key: "metro-jets", name: "Metro Jets" },
+  "a8ee2320": { key: "contax", name: "Contax" },
 };
 const DEFAULT_ORG = "72bc9771";
 const DEFAULT_SEASON = "e2eff7a5"; // SAUCNA Summer Juniors, Summer 2026/27
