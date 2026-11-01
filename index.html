@@ -11,6 +11,26 @@
 <meta name="apple-mobile-web-app-title" content="SMAA Netball">
 <link rel="icon" type="image/svg+xml" href="assets/smaa-logo.svg">
 <script>
+  // Old addresses forward to smaa.scozo.com.au, carrying this phone's
+  // starred teams, theme and visit tag so nothing resets and visits aren't double-counted.
+  (function () {
+    var NEW = "https://smaa.scozo.com.au", KEYS = ["smaa-favs-v1", "smaa-theme", "club-device-id"];
+    try {
+      if (/github\.io$|netlify\.app$/.test(location.hostname)) {
+        var p = {};
+        KEYS.forEach(function (k) { var v = localStorage.getItem(k); if (v) p[k] = v; });
+        location.replace(NEW + "/" + location.search + "#import=" + encodeURIComponent(JSON.stringify(p)));
+        return;
+      }
+      if (location.hash.indexOf("#import=") === 0) {
+        var d = JSON.parse(decodeURIComponent(location.hash.slice(8)));
+        KEYS.forEach(function (k) { if (typeof d[k] === "string" && !localStorage.getItem(k)) localStorage.setItem(k, d[k]); });
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+    } catch (e) {}
+  })();
+</script>
+<script>
   // Apply the saved theme before anything paints, so there's no flash.
   // Light is the default; "dark" or "auto" (follow the phone) only if someone picked it.
   (function () {
