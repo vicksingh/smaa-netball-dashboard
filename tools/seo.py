@@ -159,3 +159,30 @@ def run(repo: str):
 if __name__ == "__main__":
     for r in (sys.argv[1:] or CLUBS):
         run(r)
+
+
+def llms(repo: str):
+    """llms.txt: a plain summary for AI assistants (see llmstxt.org)."""
+    c = CLUBS[repo]
+    teams = "\n".join(f"- {k}: {v}" for k, v in c["teams"])
+    site = f"\n- [{c['org_name']} website]({c['site']}): the club's own site" if c["site"] else ""
+    txt = f"""# {c['short']} Netball Matchday
+
+> Live fixtures and results for every {c['full']} netball team in {c['comp']}. Shows this week's games (date, time, court, opponent, home or away) and recent scores, grouped by age or grade. Data comes from PlayHQ each time the page opens; this page is an unofficial fan-made view by ScoZo, not the club's official site.
+
+Games are played at {c['where']}. Fixtures change weekly, so for a specific game time or score, open the live page rather than relying on this file.
+
+## Live page
+
+- [{c['short']} fixtures & results]({c['url']}): this week's games and results, with a Results tab and a Teams tab (tap a team for its full season)
+
+## Teams this season
+
+{teams}
+
+## Sources
+
+- [PlayHQ club page]({c['playhq']}): the official fixture source{site}
+- [ScoZo Netball Scorer](https://apps.apple.com/au/app/scozo-netball-scorer/id6760931216): free netball scoring app by the same maker
+"""
+    open(f"/home/claude/{repo}/llms.txt", "w").write(txt)

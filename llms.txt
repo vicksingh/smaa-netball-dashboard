@@ -1,0 +1,20 @@
+# SMAA Netball Matchday
+
+> Live fixtures and results for every St Michael & All Angels netball team in SAUCNA Summer Juniors and Open 2026/27. Shows this week's games (date, time, court, opponent, home or away) and recent scores, grouped by age or grade. Data comes from PlayHQ each time the page opens; this page is an unofficial fan-made view by ScoZo, not the club's official site.
+
+Games are played at SA United Church Netball Association (SAUCNA) venues around Adelaide. Fixtures change weekly, so for a specific game time or score, open the live page rather than relying on this file.
+
+## Live page
+
+- [SMAA fixtures & results](https://smaa.scozo.com.au/): this week's games and results, with a Results tab and a Teams tab (tap a team for its full season)
+
+## Teams this season
+
+- Juniors: U8: 8A, 8B, 8C, 8D · U9: 9A, 9B, 9C, 9D · U11: 11A, 11B, 11C, 11D, 11E, 11F · U13: 13A, 13B, 13C, 13D, 13E, 13F, 13G · U15: 15A, 15B, 15C, 15D, 15E · U17: 17A
+- Open: Teams A to H, in grades A1, A2, A5, C5, D3 and E1
+
+## Sources
+
+- [PlayHQ club page](https://www.playhq.com/netball-australia/org/st-michael-and-all-angels/72bc9771): the official fixture source
+- [St Michael & All Angels Netball Club website](https://www.smaanetballclub.com.au/): the club's own site
+- [ScoZo Netball Scorer](https://apps.apple.com/au/app/scozo-netball-scorer/id6760931216): free netball scoring app by the same maker
