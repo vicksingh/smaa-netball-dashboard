@@ -6,9 +6,11 @@ const clubs=[
  ['contax-dashboard','Contax Netball','Contax','City Night Division 1 · Summer 2026/27','contax.scozo.com.au'],
  ['morialta-dashboard','Morialta Netball','Morialta Uniting','SAUCNA Juniors & Open · Summer 2026/27','mnc.scozo.com.au'],
  ['henley-sharks','Henley Sharks Netball','Henley Sharks','SAUCNA Juniors & Open · Summer 2026/27','henley.scozo.com.au'],
+ ['matrics-dashboard','Matrics Netball','Matrics','City Night Division 1 · Summer 2026/27','matrics.scozo.com.au'],
 ];
 (async()=>{const b=await chromium.launch();
-for (const [repo,eyebrow,club,comp,url] of clubs){
+const only=process.argv.slice(2);
+for (const [repo,eyebrow,club,comp,url] of clubs){ if(only.length&&!only.includes(repo)) continue;
   const dir='/home/claude/'+repo; const s=fs.readFileSync(dir+'/index.html','utf8');
   const a=s.match(/--band-a:\s*(#[0-9a-f]{6})/i)[1], bb=s.match(/--band-b:\s*(#[0-9a-f]{6})/i)[1];
   const sky=(s.match(/--sky:\s*(#[0-9a-f]{6})/i)||[,'#ffffff'])[1];
@@ -29,7 +31,7 @@ for (const [repo,eyebrow,club,comp,url] of clubs){
   .comp{font-size:28px;font-weight:600;opacity:.88;margin:26px 0 0}
   .url{position:absolute;left:84px;bottom:40px;right:84px;display:flex;justify-content:space-between;font-family:Archivo;font-weight:700;font-stretch:100%;font-size:24px;letter-spacing:.06em;opacity:.8}
   </style></head><body><div class="slab"></div><div class="glow"></div>
-  <div class="wrap"><div class="logo"><img src="file://${dir}/${logo}" style="${repo==='contax-dashboard'?'max-width:220px':''}"></div>
+  <div class="wrap"><div class="logo"><img src="file://${dir}/${logo}" style="${repo==='contax-dashboard'?'max-width:220px':repo==='matrics-dashboard'?'width:300px;background:#fff;padding:22px 26px;border-radius:28px;box-sizing:border-box':''}"></div>
   <div><p class="eyebrow">${eyebrow}</p><h1>Fixtures<br>&amp; Results</h1><p class="comp">${comp}</p></div></div>
   <div class="url"><span>${url.toUpperCase()}</span><span>LIVE FROM PLAYHQ</span></div></body></html>`;
   const p=await b.newPage({viewport:{width:1200,height:630}});

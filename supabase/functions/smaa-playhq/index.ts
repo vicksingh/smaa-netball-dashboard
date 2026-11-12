@@ -1,4 +1,4 @@
-// Club dashboards — PlayHQ messenger (SMAA, Metro Jets, Contax, Morialta, Henley Sharks)
+// Club dashboards — PlayHQ messenger (SMAA, Metro Jets, Contax, Morialta, Henley Sharks, Matrics)
 // Fetches a club's teams and fixtures from PlayHQ's public fixture feed and
 // returns one tidy JSON bundle the dashboard can read. Only clubs in CLUBS
 // below are allowed, so this can't be used as a general PlayHQ proxy.
@@ -19,6 +19,7 @@ const CLUBS: Record<string, { key: string; name: string }> = {
   "a8ee2320": { key: "contax", name: "Contax" },
   "46cdd3a1": { key: "morialta", name: "Morialta Uniting" },
   "e234a948": { key: "henley-sharks", name: "Henley Sharks" },
+  "0969cc64": { key: "matrics", name: "Matrics" },
 };
 const DEFAULT_ORG = "72bc9771";
 const DEFAULT_SEASON = "e2eff7a5"; // SAUCNA Summer Juniors, Summer 2026/27

@@ -63,6 +63,18 @@ CLUBS = {
     teams=[("Juniors", "U8: 8A, 8B · U9: 9A · U11: 11A, Blue 11B, Silver 11C, 11D, 11E · U13: 13A, 13B, 13C, 13D · U15: 15A, 15B, 15C, 15D, 15E · U17: 17A"),
            ("Open", "Teams A to H, in grades A1, A4, B1, B2, B4, B5, C3 and D1")],
     prefix="Henley Sharks"),
+  "matrics-dashboard": dict(
+    url="https://matrics.scozo.com.au/", short="Matrics", full="Matrics",
+    org_name="Matrics Netball Club", site="https://www.matricsnetball.com.au/",
+    playhq="https://www.playhq.com/netball-australia/org/matrics/0969cc64",
+    comp="Netball SA City Night Division 1, Summer 2026/27",
+    where="Netball SA Stadium, Mile End, Adelaide",
+    title="Matrics Netball Fixtures & Results | City Night Division 1 2026/27",
+    desc="This week's Matrics netball fixtures, game times, courts and results for every Matrics, Matrics Gold and Matrics Maroon team in Netball SA City Night Division 1, Summer 2026/27. Live from PlayHQ.",
+    teams=[("Sub Primary", "1A (Gold and Maroon), 2"), ("Primary", "1/2 (Gold and Maroon), 3 (Gold and Maroon), 4A, 5B (two teams)"),
+           ("Sub Junior", "1, 2, 3 (two teams), 4, 5, 6A"), ("Junior", "1, 2 (Gold and Maroon), 3, 4 (Gold and Maroon), 5A, 6"),
+           ("Inter", "1, 2 (Gold and Maroon), 3, 4A (Gold and Maroon)"), ("Seniors", "A1, A2 (Gold and Maroon), B2")],
+    prefix="Matrics"),
 }
 
 ABOUT_CSS = """
